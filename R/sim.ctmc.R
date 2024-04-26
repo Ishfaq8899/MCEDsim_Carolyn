@@ -1,5 +1,5 @@
 
-#####################################################################
+######################################################################
 #' Simulate from a homogenous continuous-time Markov chain (CTMC)
 #'
 #' This function simulate from a homogenous CYMC characterized
