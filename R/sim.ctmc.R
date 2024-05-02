@@ -1,5 +1,11 @@
 
-######################################################################
+########################################################################################
+#Author: Jane Lange
+#This function simulates from a homogeneous CTMC characterized by rate.matrix
+#INPUTS: rate.matrix=rate matrix, start.state=starting state for CTMC, end.time=time
+#         to stop data simulations; start.time= time to start data simulations
+#OUTPUTS: a list with two objects: "times"=transition times and "states"=transition states
+##########################################################################################
 #' Simulate from a homogenous continuous-time Markov chain (CTMC)
 #'
 #' This function simulate from a homogenous CYMC characterized
@@ -19,7 +25,7 @@
 #'
 #' @export
 
-sim.ctmc <- function(start.state, rate.matrix, end.time, start.time = 0, absorbing.time = 0){
+sim.ctmc <- function(start.state, rate.matrix, end.time, start.time = 0, absorbing.state = 0){
 
  state.space <- seq(1:dim(rate.matrix)[1])
  size <- dim(rate.matrix)[1]
@@ -60,7 +66,15 @@ sim.ctmc <- function(start.state, rate.matrix, end.time, start.time = 0, absorbi
   return(return.list)
  }
 
-#################################################################################
+###################################################################################################
+# This function gets the state of a CTMC at different discrete observation times
+#INPUTS: ctmc.times=the transition times for the CTMC
+#        ctmc.states=the states at each of the transition times
+#        obs.times = the discrete observation times
+#OUTPUTS: a dataframe with two columns: obs.times= observation times, states=value of state at obs.times
+#WARNING: if the observation times are outside of max and min transition time, then
+#         the state is assumed to be unchanged from the closest recorded transition time
+#################################################################################################
 #' Discretize a continuous-time Markov chain (CTMC) trajectory
 #'
 #' This function discretizes a CTMC trajectory given the transition times and states.
@@ -80,14 +94,22 @@ sim.ctmc <- function(start.state, rate.matrix, end.time, start.time = 0, absorbi
 #'
 #' @export
 
-discrete.ctmc<-function(ctmc.times,ctmc.states,obs.times){
-  out<- data.frame(approx(x=ctmc.times,y=ctmc.states,xout=obs.times,rule=2,f=0,method="constant"))
+discrete.ctmc<-function(ctmc.times, ctmc.states, obs.times){
+
+  out<- data.frame(approx(x=ctmc.times, y=ctmc.states, xout=obs.times, rule=2, f=0, method="constant"))
   colnames(out)<-c("obs.times","states")
   return(out)
 }
 
 
-#####################################################################################
+###################################################################################################
+# This function gets an observed data point in a HMM based on an underlying state an emission matrix
+#INPUTS: underlying.state = unobserved underlying state in HMM,
+#        emmision.matrix=a matrix with the emission probablities.
+#        the ith row corresponds to the hidden value X(t)=i, and the kth column to O(t)=k|X(t)=i
+#        thus the rows sum to 1, and k columns correspond to the k possible observed states
+#OUTPUTS: the observed data point
+#################################################################################################
 #' Get an observed data point from an underlying state using an emission matrix
 #'
 #' This function retrieves an observed data point from an underlying state using an emission matrix.
@@ -104,14 +126,19 @@ discrete.ctmc<-function(ctmc.times,ctmc.states,obs.times){
 #'
 #' @export
 
-get.observed.datapoint <- function(underlying.state, emission.matrix) {
-  states <- seq(1:dim(emission.matrix)[2])
-  probs <- emission.matrix[underlying.state,]
-  sample(x = states, size = 1, prob = probs)
+get.observed.datapoint<-function(underlying.state, emission.matrix){
+
+  states<-seq(1:dim(emission.matrix)[2])
+  probs<-emission.matrix[underlying.state,]
+  sample(x=states, size=1, prob=probs)
 }
 
-############################################################################################
-
+###################################################################################################
+# This function the observed states in an HMM for multiple observation times
+# INPUTS: obs.times=a vector of observation times; underlying states=corresponding underlying states
+#         emission.matrix=emission matrix for observed data
+# OUTPUTS: dataframe with two columns: obs.times and obs.data (data at corresponding times)
+#################################################################################################
 #' Generate observed data from a Hidden Markov Model (HMM)
 #'
 #' This function generates observed data from a Hidden Markov Model (HMM) given the observation times, underlying states, and emission matrix.
@@ -138,7 +165,13 @@ observed.data.hmm <- function(obs.times, underlying.states, emission.matrix) {
   return(out)
 }
 
-###################################################################################################
+#############################################################################################################
+# This function obtains simulated data from an HMM at discrete observation times for a single individual
+# INPUTS: rate.matrix=transition intensity matrix for underlying states, emission.matrix=emissin matrix for observed states
+#         obs.times=discrete observation times; start.time=the start time for the CTMC simulation, start.state, the start state (single or vector)
+#         for the CTMC, num.individuals=number of individuals to simulate data for
+# OUTPUTS: dataframe with 5 columns: ID, screen_diagnosis_time, screen_diagnosis_stage, clinical_diagnosis_time, clinical_diagnosis_stage
+##############################################################################################################
 #' Get observed data for an individual from a CTMC trajectory and Hidden Markov Model (HMM)
 #'
 #' This function generates observed data for an individual from a continuous-time Markov chain (CTMC) trajectory and Hidden Markov Model (HMM).
@@ -161,7 +194,7 @@ observed.data.hmm <- function(obs.times, underlying.states, emission.matrix) {
 #'
 #' @export
 
-gets.obs.data.individual <- function(ID, rate.matrix, emission.matrix, obs.times = seq(1, 30, 2), end.time = 30, start.time = 0, start.state = 1) {
+get.obs.data.individual <- function(ID, rate.matrix, emission.matrix, obs.times = seq(1, 30, 2), end.time = 30, start.time = 0, start.state = 1) {
 
   n_states <- dim(rate.matrix)[1]
   clin_dx_late_state <- n_states
@@ -207,7 +240,14 @@ gets.obs.data.individual <- function(ID, rate.matrix, emission.matrix, obs.times
   return(data.frame(ID, screen_diagnosis_time, screen_diagnosis_stage, clinical_diagnosis_time, clinical_diagnosis_stage))
 }
 
-###############################################################################################
+##########################################################################################################
+# This function obtains simulated data from an HMM at discrete observation times for multiple subjects
+# INPUTS: rate.matrix=transition intensity matrix for underlying states, emission.matrix=emissin matrix for observed states
+#         obs.times=discrete observation times; start.time=the start time for the CTMC simulation, start.state, the start state (single or vector)
+#         for the CTMC, num.individuals=number of individuals to simulate data for
+# OUTPUTS: dataframe with 5 columns: ID, screen_diagnosis_time, screen_diagnosis_stage, clinical_diagnosis_time, clinical_diagnosis_stage
+#########################################################################################################
+
 #' Generate observed data for multiple individuals from a CTMC trajectory and Hidden Markov Model (HMM)
 #'
 #' This function generates observed data for multiple individuals from a continuous-time Markov chain (CTMC) trajectory and Hidden Markov Model (HMM).
@@ -230,57 +270,17 @@ gets.obs.data.individual <- function(ID, rate.matrix, emission.matrix, obs.times
 #'
 #' @export
 
-get.obs.data.many <- function(num.individuals, rate.matrix, emission.matrix, obs.times = seq(1, 30, 2), end.time = 30,
-                              start.time = 0, start.state = 1) {
-  outlist <- lapply(seq(1:num.individuals), FUN = "gets.obs.data.individual", rate.matrix = rate.matrix,
-                    emission.matrix = emission.matrix, obs.times = obs.times, end.time = end.time, start.time = start.time,
-                    start.state = start.state)
-  out <- do.call("rbind", outlist)
-  return(out)
+get.obs.data.many<-function(num.individuals,rate.matrix, emission.matrix, obs.times = seq(1, 30, 2), end.time = 30,
+                            start.time = 0, start.state = 1){
+  outlist=lapply(seq(1:num.individuals),FUN="gets.obs.data.individual", rate.matrix=rate.matrix,
+                 emission.matrix=emission.matrix, obs.times = obs.times, end.time = end.time, start.time = start.time,
+                 start.state = start.state)
+  # browser()
+  out=do.call("rbind",outlist)
+  # out$clinical_diagnosis_stage=factor(out$clinical_diagnosis_stage,labels=c("Early","Late"))
+  #out$screen_diagnosis_stage=factor(out$screen_diagnosis_stage,labels=c("Early","Late"))
+
 }
-
-##########################################################################################
-#' Generate observed data for multiple individuals from a CTMC trajectory and Hidden Markov Model (HMM)
-#'
-#' This function generates observed data for multiple individuals from a continuous-time Markov chain (CTMC) trajectory and Hidden Markov Model (HMM).
-#'
-#' @param rate.matrix The rate matrix of the CTMC.
-#' @param emission.matrix The emission matrix of the HMM.
-#' @param obs.times The observation times (default is seq(1, 30, 2)).
-#' @param end.time The end time for the CTMC trajectory (default is 30).
-#' @param start.time The start time for the CTMC trajectory (default is 0).
-#' @param start.state The start state for the CTMC trajectory (default is 1).
-#' @param num.individuals The number of individuals for which to generate observed data.
-#' @param simplify Logical indicating whether to simplify the output (default is FALSE).
-#'
-#' @return A list containing observed data and CTMC trajectories.
-#'
-#' @examples
-#' # Generate observed data for multiple individuals
-#' rate_matrix <- matrix(c(-0.1, 0.1, 0.2, -0.2), nrow = 2)
-#' emission_matrix <- matrix(c(0.2, 0.3, 0.5, 0.1, 0.4, 0.5), nrow = 2)
-#' observed_data_many_old <- get.obs.data.many.old(rate.matrix = rate_matrix, emission.matrix = emission_matrix)
-#'
-#' @export
-
-get.obs.data.many.old <- function(rate.matrix, emission.matrix, obs.times = seq(1, 30, 2), end.time = 30, start.time = 0, start.state = 1, num.individuals, simplify = FALSE) {
-
-  if (length(start.state) > 1) {
-    trajectory.list <- lapply(start.state, FUN = "sim.ctmc", rate.matrix = rate.matrix, end.time = end.time, start.time = 0)
-  } else {
-    trajectory.list <- replicate(n = num.individuals, sim.ctmc(rate.matrix = rate.matrix, start.state = start.state, end.time = end.time, start.time = 0), simplify = FALSE)
-  }
-  if (is.list(obs.times)) {
-    underlying.data.list <- mapply(lapply(trajectory.list, "[[", c("times")), lapply(trajectory.list, "[[", c("states")), obs.times = obs.times, FUN = "discrete.ctmc", SIMPLIFY = simplify)
-  } else {
-    underlying.data.list <- mapply(lapply(trajectory.list, "[[", c("times")), lapply(trajectory.list, "[[", c("states")), FUN = "discrete.ctmc", MoreArgs = list(obs.times = obs.times), SIMPLIFY = simplify)
-  }
-  out.list <- mapply(underlying.data.list["obs.times",], underlying.states = underlying.data.list["states",], FUN = "observed.data.hmm", MoreArgs = list(emission.matrix = emission.matrix), SIMPLIFY = simplify)
-  return(list(out.list = out.list, trajectory.list = trajectory.list))
-}
-
-
-########################################################
 
 
 
