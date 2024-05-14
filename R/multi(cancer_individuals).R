@@ -33,8 +33,8 @@ sim_multiple_cancer_indiv <- function(ID, cancer_sites, rate_matrices, early_sen
 
   emission_matrices <- mapply(FUN = "create_emission_matrix", rate_matrices, early_sensitivities, late_sensitivities, specificities, SIMPLIFY = FALSE)
 
-  get.obs.data.individual.temp <- function(rate.matrix, emission.matrix, ID, obs.times = seq(1, 30, 2), end.time = 30, start.time = 0, start.state = 1) {
-    get.obs.data.individual(ID, rate.matrix, emission.matrix, obs.times = seq(1, 30, 2), end.time = 30, start.time = 0, start.state = 1)
+  get.obs.data.individual.temp <- function(rate.matrix, emission.matrix, ID, obs.times = seq(1, 30, 2), end.time, start.time = 0, start.state = 1) {
+    get.obs.data.individual(ID, rate.matrix, emission.matrix, obs.times = seq(1, 30, 2), end.time = end.time, start.time = 0, start.state = 1)
   }
 
   out <- mapply(FUN = "get.obs.data.individual.temp", rate_matrices, emission_matrices,
