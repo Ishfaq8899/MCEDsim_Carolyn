@@ -232,7 +232,7 @@ get.obs.data.individual <- function(ID, rate.matrix, emission.matrix, obs.times 
 
   if (screen_early_state %in% c(observed.data$obs.data) || screen_late_state %in% c(observed.data$obs.data)) {
 
-    screen_diagnosis_index <- which(observed.data$obs.data %in% c(screen_early_state, screen_late_state) == T)
+    screen_diagnosis_index <- min(which(observed.data$obs.data %in% c(screen_early_state, screen_late_state) == T))
     screen_diagnosis_time <- observed.data$obs.times[screen_diagnosis_index]
     screen_diagnosis_stage <- observed.data$obs.data[screen_diagnosis_index]
   }

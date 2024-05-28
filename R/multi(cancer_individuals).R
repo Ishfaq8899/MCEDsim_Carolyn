@@ -40,8 +40,18 @@ sim_multiple_cancer_indiv <- function(ID, cancer_sites, rate_matrices, early_sen
   out <- mapply(FUN = "get.obs.data.individual.temp", rate_matrices, emission_matrices,
                 MoreArgs = list(ID = ID, obs.times = obs.times, end.time = end.time, start.time = start.time, start.state = start.state), SIMPLIFY = FALSE)
 
+
   results <- do.call(rbind, out)
+  if(dim(results)[1]!=length(cancer_sites)){
+
+  }
+
+  #  if(results$ID[1]==154){
+  #  browser()
+  #}
+  #browser()
   results$cancer_site <- cancer_sites
+
 
   return(results)
 }
