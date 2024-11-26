@@ -1,4 +1,4 @@
-
+#Test
 ########################################################################################
 #Author: Jane Lange
 #This function simulates from a homogeneous CTMC characterized by rate.matrix
@@ -94,16 +94,16 @@ sim.ctmc <- function(start.state, rate.matrix, end.time, start.time = 0, absorbi
 #'
 #' @export
 
-discrete.ctmc<-function(ctmc.times, ctmc.states, obs.times){
+discrete.ctmc <- function(ctmc.times, ctmc.states, obs.times){
 
-  out<- data.frame(approx(x=ctmc.times, y=ctmc.states, xout=obs.times, rule=2, f=0, method="constant"))
-  colnames(out)<-c("obs.times","states")
+  out <- data.frame(approx(x=ctmc.times, y=ctmc.states, xout=obs.times, rule=2, f=0, method="constant"))
+  colnames(out) <- c("obs.times","states")
   return(out)
 }
 
 
 ###################################################################################################
-# This function gets an observed data point in a HMM based on an underlying state an emission matrix
+# This function gets an observed data point in a hidden Markov model(HMM) based on an underlying state an emission matrix
 #INPUTS: underlying.state = unobserved underlying state in HMM,
 #        emmision.matrix=a matrix with the emission probablities.
 #        the ith row corresponds to the hidden value X(t)=i, and the kth column to O(t)=k|X(t)=i
@@ -126,7 +126,7 @@ discrete.ctmc<-function(ctmc.times, ctmc.states, obs.times){
 #'
 #' @export
 
-get.observed.datapoint<-function(underlying.state, emission.matrix){
+get.observed.datapoint <- function(underlying.state, emission.matrix){
 
   states<-seq(1:dim(emission.matrix)[2])
   probs<-emission.matrix[underlying.state,]
@@ -194,7 +194,9 @@ observed.data.hmm <- function(obs.times, underlying.states, emission.matrix) {
 #'
 #' @export
 
-get.obs.data.individual <- function(ID, rate.matrix, emission.matrix, obs.times = seq(1, 30, 2), end.time = 30, start.time = 0, start.state = 1) {
+get.obs.data.individual <- function(ID, rate.matrix, emission.matrix,
+                                    obs.times = seq(1, 30, 2), end.time = 30,
+                                    start.time = 0, start.state = 1) {
 
   n_states <- dim(rate.matrix)[1]
   clin_dx_late_state <- n_states
@@ -203,7 +205,8 @@ get.obs.data.individual <- function(ID, rate.matrix, emission.matrix, obs.times 
   screen_late_state <- 3
 
   # Simulate CTMC trajectory for individual
-  trajectory <- sim.ctmc(rate.matrix = rate.matrix, start.state = start.state, end.time = end.time, start.time = start.time)
+  trajectory <- sim.ctmc(rate.matrix = rate.matrix, start.state = start.state,
+                         end.time = end.time, start.time = start.time)
 
   # Discretize states at observation times
   discrete.states <- discrete.ctmc(ctmc.times = trajectory$times,
@@ -228,16 +231,29 @@ get.obs.data.individual <- function(ID, rate.matrix, emission.matrix, obs.times 
     clinical_diagnosis_index <- which(trajectory$states %in% c(clin_dx_early_state, clin_dx_late_state) == T)
     clinical_diagnosis_time <- trajectory$times[clinical_diagnosis_index]
     clinical_diagnosis_stage <- trajectory$states[clinical_diagnosis_index]
+
+   clinical_diagnosis_stage <- ifelse(clinical_diagnosis_stage == clin_dx_early_state, "early", "late")
   }
 
   if (screen_early_state %in% c(observed.data$obs.data) || screen_late_state %in% c(observed.data$obs.data)) {
 
+    #Need to fix this so it works with false positives.  Currently does not work!
     screen_diagnosis_index <- min(which(observed.data$obs.data %in% c(screen_early_state, screen_late_state) == T))
     screen_diagnosis_time <- observed.data$obs.times[screen_diagnosis_index]
     screen_diagnosis_stage <- observed.data$obs.data[screen_diagnosis_index]
+
+    screen_diagnosis_stage <- ifelse(screen_diagnosis_stage == screen_early_state, "early", "late")
   }
 
-  return(data.frame(ID, screen_diagnosis_time, screen_diagnosis_stage, clinical_diagnosis_time, clinical_diagnosis_stage))
+
+  # Print diagnosis times and stages
+#  print(paste("Clinical Diagnosis Time:", clinical_diagnosis_time))
+#  print(paste("Clinical Diagnosis Stage:", clinical_diagnosis_stage))
+#  print(paste("Screen Diagnosis Time:", screen_diagnosis_time))
+#  print(paste("Screen Diagnosis Stage:", screen_diagnosis_stage))
+
+  return(data.frame(ID, screen_diagnosis_time, screen_diagnosis_stage,
+                    clinical_diagnosis_time, clinical_diagnosis_stage))
 }
 
 ##########################################################################################################
