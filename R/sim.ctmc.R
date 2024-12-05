@@ -234,7 +234,7 @@ get.obs.data.individual <- function(ID, rate.matrix, emission.matrix,
 
    clinical_diagnosis_stage <- ifelse(clinical_diagnosis_stage == clin_dx_early_state, "early", "late")
   }
-
+  browser()
   if (screen_early_state %in% c(observed.data$obs.data) || screen_late_state %in% c(observed.data$obs.data)) {
 
     #Need to fix this so it works with false positives.  Currently does not work!
@@ -245,8 +245,7 @@ get.obs.data.individual <- function(ID, rate.matrix, emission.matrix,
     screen_diagnosis_stage <- ifelse(screen_diagnosis_stage == screen_early_state, "early", "late")
   }
 
-
-  # Print diagnosis times and stages
+#  Print diagnosis times and stages
 #  print(paste("Clinical Diagnosis Time:", clinical_diagnosis_time))
 #  print(paste("Clinical Diagnosis Stage:", clinical_diagnosis_stage))
 #  print(paste("Screen Diagnosis Time:", screen_diagnosis_time))
@@ -255,6 +254,13 @@ get.obs.data.individual <- function(ID, rate.matrix, emission.matrix,
   return(data.frame(ID, screen_diagnosis_time, screen_diagnosis_stage,
                     clinical_diagnosis_time, clinical_diagnosis_stage))
 }
+
+
+##################################
+# For control arm (no screening)
+##################################
+
+
 
 ##########################################################################################################
 # This function obtains simulated data from an HMM at discrete observation times for multiple subjects
