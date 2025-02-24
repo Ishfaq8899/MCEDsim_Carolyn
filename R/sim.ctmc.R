@@ -1,4 +1,3 @@
-#Test
 ########################################################################################
 #Author: Jane Lange
 #This function simulates from a homogeneous CTMC characterized by rate.matrix
@@ -24,7 +23,6 @@
 #' sim_results <- sim.ctmc(start.state = 1, rate.matrix = rate_matrix, end.time = 10)
 #'
 #' @export
-
 sim.ctmc <- function(start.state, rate.matrix, end.time, start.time = 0, absorbing.state = 0){
 
  state.space <- seq(1:dim(rate.matrix)[1])
@@ -94,16 +92,16 @@ sim.ctmc <- function(start.state, rate.matrix, end.time, start.time = 0, absorbi
 #'
 #' @export
 
-discrete.ctmc <- function(ctmc.times, ctmc.states, obs.times){
+discrete.ctmc<-function(ctmc.times, ctmc.states, obs.times){
 
-  out <- data.frame(approx(x=ctmc.times, y=ctmc.states, xout=obs.times, rule=2, f=0, method="constant"))
-  colnames(out) <- c("obs.times","states")
+  out<- data.frame(approx(x=ctmc.times, y=ctmc.states, xout=obs.times, rule=2, f=0, method="constant"))
+  colnames(out)<-c("obs.times","states")
   return(out)
 }
 
 
 ###################################################################################################
-# This function gets an observed data point in a hidden Markov model(HMM) based on an underlying state an emission matrix
+# This function gets an observed data point in a HMM based on an underlying state an emission matrix
 #INPUTS: underlying.state = unobserved underlying state in HMM,
 #        emmision.matrix=a matrix with the emission probablities.
 #        the ith row corresponds to the hidden value X(t)=i, and the kth column to O(t)=k|X(t)=i
@@ -126,7 +124,7 @@ discrete.ctmc <- function(ctmc.times, ctmc.states, obs.times){
 #'
 #' @export
 
-get.observed.datapoint <- function(underlying.state, emission.matrix){
+get.observed.datapoint<-function(underlying.state, emission.matrix){
 
   states<-seq(1:dim(emission.matrix)[2])
   probs<-emission.matrix[underlying.state,]
@@ -179,7 +177,7 @@ observed.data.hmm <- function(obs.times, underlying.states, emission.matrix) {
 #' @param ID The identifier for the individual.
 #' @param rate.matrix The rate matrix of the CTMC.
 #' @param emission.matrix The emission matrix of the HMM.
-#' @param obs.times The observation times (default is seq(1, 30, 2)).
+#' @param obs.times The screening times (default is seq(1, 30, 2)).
 #' @param end.time The end time for the CTMC trajectory (default is 30).
 #' @param start.time The start time for the CTMC trajectory (default is 0).
 #' @param start.state The start state for the CTMC trajectory (default is 1).
@@ -205,7 +203,7 @@ get.obs.data.individual <- function(ID, rate.matrix, emission.matrix,
   screen_late_state <- 3
 
   # Simulate CTMC trajectory for individual
-  trajectory <- sim.ctmc(rate.matrix = rate.matrix, start.state = start.state,
+  trajectory <- sim.ctmc(rate.matrix = rate.matrix, start.state = start.state, 
                          end.time = end.time, start.time = start.time)
 
   # Discretize states at observation times
@@ -231,36 +229,81 @@ get.obs.data.individual <- function(ID, rate.matrix, emission.matrix,
     clinical_diagnosis_index <- which(trajectory$states %in% c(clin_dx_early_state, clin_dx_late_state) == T)
     clinical_diagnosis_time <- trajectory$times[clinical_diagnosis_index]
     clinical_diagnosis_stage <- trajectory$states[clinical_diagnosis_index]
-
-   clinical_diagnosis_stage <- ifelse(clinical_diagnosis_stage == clin_dx_early_state, "early", "late")
+    
+    clinical_diagnosis_stage <- ifelse(clinical_diagnosis_stage == clin_dx_early_state, "early", "late")  
   }
-#  browser()
+
+  #if(!is.na(clinical_diagnosis_time)&(clinical_diagnosis_time>60 & clinical_diagnosis_time<70)){
+  #  browser()
+  #}
   if (screen_early_state %in% c(observed.data$obs.data) || screen_late_state %in% c(observed.data$obs.data)) {
 
-    #Need to fix this so it works with false positives.  Currently does not work!
+    # Need to fix this so it works with false positives. Currently does not work!
     screen_diagnosis_index <- min(which(observed.data$obs.data %in% c(screen_early_state, screen_late_state) == T))
     screen_diagnosis_time <- observed.data$obs.times[screen_diagnosis_index]
     screen_diagnosis_stage <- observed.data$obs.data[screen_diagnosis_index]
-
-    screen_diagnosis_stage <- ifelse(screen_diagnosis_stage == screen_early_state, "early", "late")
+    
+   screen_diagnosis_stage <- ifelse(screen_diagnosis_stage == screen_early_state, "early", "late")  
   }
-
-#  Print diagnosis times and stages
-#  print(paste("Clinical Diagnosis Time:", clinical_diagnosis_time))
-#  print(paste("Clinical Diagnosis Stage:", clinical_diagnosis_stage))
-#  print(paste("Screen Diagnosis Time:", screen_diagnosis_time))
-#  print(paste("Screen Diagnosis Stage:", screen_diagnosis_stage))
-
-  return(data.frame(ID, screen_diagnosis_time, screen_diagnosis_stage,
+#  browser()
+  return(data.frame(ID, screen_diagnosis_time, screen_diagnosis_stage, 
                     clinical_diagnosis_time, clinical_diagnosis_stage))
 }
 
 
-##################################
-# For control arm (no screening)
-##################################
-
-
+##############################################################################################################
+#' Get observed data for an individual from of an individual in the control arm based on the CTMC natural history trajectory
+#'
+#' This function generates observed data for an individual from a continuous-time Markov chain (CTMC) trajectory and Hidden Markov Model (HMM).
+#'
+#' @param ID The identifier for the individual.
+#' @param rate.matrix The rate matrix of the CTMC.
+#' @param end.time The end time for the CTMC trajectory (default is 30).
+#' @param start.time The start time for the CTMC trajectory (default is 0).
+#' @param start.state The start state for the CTMC trajectory (default is 1).
+#'
+#' @return A data frame containing the identifier, screen diagnosis time, screen diagnosis stage, clinical diagnosis time, and clinical diagnosis stage.
+#'
+#' @examples
+#' # Get observed data for an individual
+#' rate_matrix <- matrix(c(-0.1, 0.1, 0.2, -0.2), nrow = 2)
+#' obs_data_individual <- gets.obs.data.individual.control(ID = 1, rate.matrix = rate_matrix, end.time=30,start.time=0,start.state=1)
+#'
+#' @export
+get.obs.data.individual.control <- function(ID, rate.matrix, end.time = 30,
+                                            start.time = 0, start.state = 1) {
+  
+  n_states <- dim(rate.matrix)[1]
+  clin_dx_late_state <- n_states
+  clin_dx_early_state <- n_states - 1
+  screen_early_state <- 2
+  screen_late_state <- 3
+  
+  # Simulate CTMC trajectory for individual
+  trajectory <- sim.ctmc(rate.matrix = rate.matrix, start.state = start.state,
+                         end.time = end.time, start.time = start.time)
+  
+   
+  # Clinical diagnosis time and stage
+  clinical_diagnosis_time <- NA
+  clinical_diagnosis_stage <- NA
+  
+  # Screen diagnosis time and stage
+  screen_diagnosis_time <- NA
+  screen_diagnosis_stage <- NA
+  
+  if (clin_dx_early_state %in% c(trajectory$states) || clin_dx_late_state %in% c(trajectory$states)) {
+    
+    clinical_diagnosis_index <- which(trajectory$states %in% c(clin_dx_early_state, clin_dx_late_state) == T)
+    clinical_diagnosis_time <- trajectory$times[clinical_diagnosis_index]
+    clinical_diagnosis_stage <- trajectory$states[clinical_diagnosis_index]
+    
+    clinical_diagnosis_stage <- ifelse(clinical_diagnosis_stage == clin_dx_early_state, "early", "late")  
+  }
+ 
+  return(data.frame(ID, screen_diagnosis_time, screen_diagnosis_stage, 
+                    clinical_diagnosis_time, clinical_diagnosis_stage))
+}
 
 ##########################################################################################################
 # This function obtains simulated data from an HMM at discrete observation times for multiple subjects
@@ -291,17 +334,13 @@ get.obs.data.individual <- function(ID, rate.matrix, emission.matrix,
 #' observed_data_many <- get.obs.data.many(num.individuals = 10, rate.matrix = rate_matrix, emission.matrix = emission_matrix)
 #'
 #' @export
-
 get.obs.data.many<-function(num.individuals,rate.matrix, emission.matrix, obs.times = seq(1, 30, 2), end.time = 30,
                             start.time = 0, start.state = 1){
   outlist=lapply(seq(1:num.individuals),FUN="gets.obs.data.individual", rate.matrix=rate.matrix,
                  emission.matrix=emission.matrix, obs.times = obs.times, end.time = end.time, start.time = start.time,
                  start.state = start.state)
-  # browser()
+  
   out=do.call("rbind",outlist)
-  # out$clinical_diagnosis_stage=factor(out$clinical_diagnosis_stage,labels=c("Early","Late"))
-  #out$screen_diagnosis_stage=factor(out$screen_diagnosis_stage,labels=c("Early","Late"))
-
 }
 
 
