@@ -9,7 +9,7 @@ sim.ctmc(
   rate.matrix,
   end.time,
   start.time = 0,
-  absorbing.time = 0
+  absorbing.state = 0
 )
 }
 \arguments{

@@ -19,3 +19,13 @@ A data frame containing the oberved times and corresponding states.
 \description{
 This function discretizes a CTMC trajectory given the transition times and states.
 }
+\examples{
+# example code
+
+# Discretize a CTMC trajectory
+times <- c(0, 1, 2, 3, 4)
+states <- c(1, 2, 1, 2, 1)
+obs_times <- c(0.5, 1.5, 2.5, 3.5)
+discretized_data <- discrete.ctmc(ctmc.times = times, ctmc.states = states, obs.times = obs_times)
+
+}

@@ -17,3 +17,9 @@ An observed data point.
 \description{
 This function retrieves an observed data point from an underlying state using an emission matrix.
 }
+\examples{
+#Get an observed data point
+emission_matrix <- matrix(c(0.2, 0.5, 0.1, 0.4, 0.5), nrow = 2)
+observed_data_point <- get.observed.datapoint(underlying.state = 1, emission.matrix = emission_matrix)
+
+}
