@@ -1,21 +1,21 @@
 ########################################################################################
 #Author: Jane Lange
-#This function simulates from a homogeneous CTMC characterized by rate.matrix
+#This function simulates from a time-homogeneous CTMC 
 #INPUTS: rate.matrix=rate matrix, start.state=starting state for CTMC, end.time=time
 #         to stop data simulations; start.time= time to start data simulations
 #OUTPUTS: a list with two objects: "times"=transition times and "states"=transition states
 ##########################################################################################
-#' Simulate from a homogenous continuous-time Markov chain (CTMC)
+#' Simulate from a time-homogeneous continuous-time Markov chain (CTMC)
 #'
-#' This function simulate from a homogenous CYMC characterized
+#' This function simulates from a time-homogeneous CTMC characterized by
 #'
 #' @param start.state      Starting state for the CTMC.
 #' @param rate.matrix      Rate matrix for the CTMC.
 #' @param start.time       Time to start simulation (default is 0).
 #' @param end.time         Time to stop simulations.
-#' @param absorbing.state  Observating state (default is 0).
+#' @param absorbing.state  Absorbing state (default is 0).
 #'
-#' @return A list of two objects: "times" containg transition times and "states" containing transition states.
+#' @return A list of two objects: "times" containing transition times and "states" containing transition states.
 #'
 #' @examples
 #' # simulate from 2-state CTMC
@@ -83,9 +83,7 @@ sim.ctmc <- function(start.state, rate.matrix, end.time, start.time = 0, absorbi
 #'
 #' @return A data frame containing the oberved times and corresponding states.
 #'
-#' @examples
-#' # example code
-#' 
+#' @example
 #' # Discretize a CTMC trajectory
 #' times <- c(0, 1, 2, 3, 4)
 #' states <- c(1, 2, 1, 2, 1)
@@ -119,7 +117,7 @@ discrete.ctmc<-function(ctmc.times, ctmc.states, obs.times){
 #'
 #' @return An observed data point.
 #'
-#' @examples
+#' @example
 #' #Get an observed data point
 #' emission_matrix <- matrix(c(0.2, 0.5, 0.1, 0.4, 0.5), nrow = 2)
 #' observed_data_point <- get.observed.datapoint(underlying.state = 1, emission.matrix = emission_matrix)

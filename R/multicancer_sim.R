@@ -3,7 +3,6 @@
 ############################################################################
 #' Simulate multiple cancer sites for an individual
 #'
-#'
 #' This function simulates the progression of multiple cancer sites for a single individual over a specified time period.
 #'
 #' @param ID                        Numeric identifier for the individual.
@@ -11,11 +10,10 @@
 #' @param rate_matrices             List of rate matrices corresponding to each cancer site.
 #' @param early_sensitivities       Numeric vector of early sensitivities for each cancer site.
 #' @param late_sensitivities        Numeric vector of late sensitivities for each cancer site.
-#' @param specificities             Numeric vector of specificities for each cancer site.
 #' @param obs.times                 Numeric vector specifying observation times.
 #' @param end.time                  Numeric value specifying the end time of the simulation.
 #' @param start.time                Numeric value specifying the start time of the simulation.
-#' @param start.state               Numeric value specifying the initial state of the simulation.
+#' @param start.states              Numeric value specifying the initial states for each of the cancer types.
 #'
 #' @return A data frame containing simulated observations for each cancer site.
 #' @export
@@ -25,38 +23,32 @@
 #'                            rate_matrices = list(lungrate, liverate),
 #'                            early_sensitivities = c(0.3, 0.2),
 #'                            late_sensitivities = c(0.9, 0.8),
-#'                            specificities = c(0.9, 0.85),
 #'                            obs.times = c(0, seq(50, 75, by = 2)), end.time = 100,
 #'                            start.time = 0,
 #'                            start.state = 1)
 #'
-sim_multiple_cancer_indiv <- function(ID, cancer_sites, rate_matrices,
-                                      early_sensitivities, late_sensitivities,
-                                      specificities, obs.times, end.time,
-                                      start.time, start.state) {
+sim_multiple_cancer_indiv <- function(ID, cancer_sites,
+                                      rate_matrices, early_sensitivities, 
+                                      late_sensitivities, specificities,
+                                      start.time, end.time, 
+                                      obs.times, start.states)  {
 
-
-  emission_matrices <- mapply(FUN = "create_emission_matrix", rate_matrices,
+  emission_matrices <- mapply(FUN = "create_emission_matrix", rate_matrices, 
                               early_sensitivities, late_sensitivities, specificities, SIMPLIFY = FALSE)
 
-  get.obs.data.individual.temp <- function(rate.matrix, emission.matrix, ID,
-                                           obs.times = obs.times, end.time = end.time,
-                                           start.time = start.time, start.state = start.state) {
+  get.obs.data.individual.temp <- function(rate.matrix, emission.matrix, start.state, ID, 
+                                           obs.times = obs.times, end.time = end.time, start.time = start.time) {
     get.obs.data.individual(ID, rate.matrix, emission.matrix, obs.times = obs.times,
                             end.time = end.time, start.time = start.time, start.state = start.state)
   }
 
-  out <- mapply(FUN = "get.obs.data.individual.temp", rate_matrices, emission_matrices,
+  out <- mapply(FUN = "get.obs.data.individual.temp", rate_matrices, emission_matrices, start.states,
                 MoreArgs = list(ID = ID, obs.times = obs.times, end.time = end.time,
-                                start.time = start.time, start.state = start.state), SIMPLIFY = FALSE)
-
+                                start.time = start.time), SIMPLIFY = FALSE)
 
   results <- do.call(rbind, out)
-  if(dim(results)[1]!=length(cancer_sites)){
-
-  }
-
   results$cancer_site <- cancer_sites
+
   return(results)
 }
 
@@ -97,6 +89,9 @@ sim_multiple_cancer_multiple_individuals <- function(num_individuals, cancer_sit
                                                      late_sensitivities, specificities,
                                                      obs.times, end.time,
                                                      start.time, start.state) {
+                                                     
+                                                    # obs.times = seq(1, 30, 2), end.time = 30,
+                                                    # start.time = 0, start.state = 1) {
 
  # browser()
   outlist = lapply(seq(1:num_individuals), FUN = function(i) sim_multiple_cancer_indiv(ID = i,
@@ -142,6 +137,18 @@ create_emission_matrix <- function(rate_matrix, early_sensitivity, late_sensitiv
 
   emission_matrix[(num_states - 1), 4] <- 1
   emission_matrix[num_states, 5] <- 1
-
   return(emission_matrix)
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
