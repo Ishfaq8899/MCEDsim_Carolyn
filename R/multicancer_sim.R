@@ -1,5 +1,5 @@
 ############################################################################
-# Function to simulate multiple cancer sites for an individual
+# Function to simulate multiple cancer sites for an individual 
 ############################################################################
 #' Simulate multiple cancer sites for an individual
 #'
