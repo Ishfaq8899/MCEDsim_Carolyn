@@ -15,7 +15,7 @@ sim_cancer_death_param(
 \arguments{
 \item{the_stage}{stage at clinical diagnosis}
 
-\item{the_cancer_site}{cancer site which include "Anus","Breast","Bladder","Colorectal","Esophagus","Headandneck","Gastric","Liver" ,"Lung","Pancreas" "Prostate" "Renal" "Ovary" "Uterine"}
+\item{the_cancer_site}{cancer site (one of "Anus","Breast","Bladder","Colorectal","Esophagus","Headandneck","Gastric","Liver" ,"Lung","Pancreas", "Prostate", "Renal", "Ovary", "Uterine")}
 
 \item{the_sex}{Male or Female}
 

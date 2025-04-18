@@ -22,7 +22,7 @@ gettime<-function(time,surv){
 # Function to simulate the time of cancer-specific death
 # INPUTS: 
 #' @param the_stage stage at clinical diagnosis
-#' @param the_cancer_site cancer site which include "Anus","Breast","Bladder","Colorectal","Esophagus","Headandneck","Gastric","Liver" ,"Lung","Pancreas" "Prostate" "Renal" "Ovary" "Uterine"
+#' @param the_cancer_site cancer site (one of "Anus","Breast","Bladder","Colorectal","Esophagus","Headandneck","Gastric","Liver" ,"Lung","Pancreas", "Prostate", "Renal", "Ovary", "Uterine")
 #' @param the_sex Male or Female
 #' @param the_model_type Weibull or  Loglogistic
 #' @param cancer_survival_dist: a data frame with columns: surv, time, site, stage, sex, model_type 
@@ -46,7 +46,7 @@ sim_cancer_death <- function(the_stage, the_cancer_site, the_sex,the_model_type,
 #' Simulate a time of cancer death for a specific cancer in a specific stage based on provided survival distributions.
 #' 
 #' @param the_stage stage at clinical diagnosis
-#' @param the_cancer_site cancer site which include "Anus","Breast","Bladder","Colorectal","Esophagus","Headandneck","Gastric","Liver" ,"Lung","Pancreas" "Prostate" "Renal" "Ovary" "Uterine"
+#' @param the_cancer_site cancer site (one of "Anus","Breast","Bladder","Colorectal","Esophagus","Headandneck","Gastric","Liver" ,"Lung","Pancreas", "Prostate", "Renal", "Ovary", "Uterine")
 #' @param the_sex Male or Female
 #' @param the_model_type Weibull or  Loglogistic
 #' @param param_table_dist a data frame with columns: intercept (based on survreg fit), scale (based on survreg fit) site, stage, sex, model_type 
