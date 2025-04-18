@@ -11,10 +11,10 @@ sim_multiple_cancer_indiv(
   early_sensitivities,
   late_sensitivities,
   specificities,
-  obs.times,
-  end.time,
   start.time,
-  start.state
+  end.time,
+  obs.times,
+  start.states
 )
 }
 \arguments{
@@ -28,15 +28,13 @@ sim_multiple_cancer_indiv(
 
 \item{late_sensitivities}{Numeric vector of late sensitivities for each cancer site.}
 
-\item{specificities}{Numeric vector of specificities for each cancer site.}
-
-\item{obs.times}{Numeric vector specifying observation times.}
+\item{start.time}{Numeric value specifying the start time of the simulation.}
 
 \item{end.time}{Numeric value specifying the end time of the simulation.}
 
-\item{start.time}{Numeric value specifying the start time of the simulation.}
+\item{obs.times}{Numeric vector specifying observation times.}
 
-\item{start.state}{Numeric value specifying the initial state of the simulation.}
+\item{start.states}{Numeric value specifying the initial states for each of the cancer types.}
 }
 \value{
 A data frame containing simulated observations for each cancer site.
@@ -49,7 +47,6 @@ sim_multiple_cancer_indiv(ID = 1, cancer_sites = c("Lung", "Liver"),
                            rate_matrices = list(lungrate, liverate),
                            early_sensitivities = c(0.3, 0.2),
                            late_sensitivities = c(0.9, 0.8),
-                           specificities = c(0.9, 0.85),
                            obs.times = c(0, seq(50, 75, by = 2)), end.time = 100,
                            start.time = 0,
                            start.state = 1)

@@ -20,8 +20,6 @@ A data frame containing the oberved times and corresponding states.
 This function discretizes a CTMC trajectory given the transition times and states.
 }
 \examples{
-# example code
-
 # Discretize a CTMC trajectory
 times <- c(0, 1, 2, 3, 4)
 states <- c(1, 2, 1, 2, 1)

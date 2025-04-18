@@ -2,7 +2,7 @@
 % Please edit documentation in R/sim.ctmc.R
 \name{sim.ctmc}
 \alias{sim.ctmc}
-\title{Simulate from a homogenous continuous-time Markov chain (CTMC)}
+\title{Simulate from a time-homogeneous continuous-time Markov chain (CTMC)}
 \usage{
 sim.ctmc(
   start.state,
@@ -21,13 +21,13 @@ sim.ctmc(
 
 \item{start.time}{Time to start simulation (default is 0).}
 
-\item{absorbing.state}{Observating state (default is 0).}
+\item{absorbing.state}{Absorbing state (default is 0).}
 }
 \value{
-A list of two objects: "times" containg transition times and "states" containing transition states.
+A list of two objects: "times" containing transition times and "states" containing transition states.
 }
 \description{
-This function simulate from a homogenous CYMC characterized
+This function simulates from a time-homogeneous CTMC characterized by
 }
 \examples{
 # simulate from 2-state CTMC

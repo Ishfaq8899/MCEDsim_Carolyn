@@ -83,7 +83,7 @@ sim.ctmc <- function(start.state, rate.matrix, end.time, start.time = 0, absorbi
 #'
 #' @return A data frame containing the oberved times and corresponding states.
 #'
-#' @example
+#' @examples
 #' # Discretize a CTMC trajectory
 #' times <- c(0, 1, 2, 3, 4)
 #' states <- c(1, 2, 1, 2, 1)
@@ -117,7 +117,7 @@ discrete.ctmc<-function(ctmc.times, ctmc.states, obs.times){
 #'
 #' @return An observed data point.
 #'
-#' @example
+#' @examples
 #' #Get an observed data point
 #' emission_matrix <- matrix(c(0.2, 0.5, 0.1, 0.4, 0.5), nrow = 2)
 #' observed_data_point <- get.observed.datapoint(underlying.state = 1, emission.matrix = emission_matrix)
