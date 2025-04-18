@@ -12,3 +12,5 @@ LazyData: true
 URL: https://github.com/Ishfaq8899/MCEDsim
 BugReports: https://github.com/Ishfaq8899/MCEDsim/issues
 RoxygenNote: 7.3.2
+Imports: msm,dplyr,survobj
+
