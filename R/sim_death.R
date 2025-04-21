@@ -28,7 +28,7 @@ gettime<-function(time,surv){
 #
 # OUTPUTS: A numeric value representing the simulated time of death due to a specific cancer
 #################################################################################################
-sim_cancer_death2 <- function(the_stage, the_cancer_site, the_sex,the_model_type, cancer_survival_dist){
+sim_cancer_death <- function(the_stage, the_cancer_site, the_sex,the_model_type, cancer_survival_dist){
   
   # Filter the survival distribution based on the type and stage
   survival_dist_indiv = filter(cancer_survival_dist,cancer_site == paste(the_cancer_site), stage==paste(the_stage),
