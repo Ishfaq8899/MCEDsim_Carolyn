@@ -2,15 +2,16 @@
 % Please edit documentation in R/sim_death.R
 \name{sim_cancer_death}
 \alias{sim_cancer_death}
-\title{Simulate a time of cancer death for a specific cancer in a specific stage based on provided survival distributions.
+\title{Simulate a time of cancer death for a specific cancer
+Simulate a time of cancer death for a specific cancer in a specific stage based on provided survival distributions.
 Uses the inverse CDF method.}
 \usage{
 sim_cancer_death(
-  age_clin_dx,
-  stage_dx,
-  cancer_type,
-  cancer_survival_dist,
-  model
+  the_stage,
+  the_cancer_site,
+  the_sex,
+  the_model_type,
+  cancer_survival_dist
 )
 }
 \arguments{
@@ -25,6 +26,7 @@ sim_cancer_death(
 \item{cancer_survival_dist:}{a data frame with columns: surv, time, site, stage, sex, model_type}
 }
 \description{
+Simulate a time of cancer death for a specific cancer
 Simulate a time of cancer death for a specific cancer in a specific stage based on provided survival distributions.
 Uses the inverse CDF method.
 }
