@@ -17,10 +17,8 @@ gettime<-function(time,surv){
 }
 
 ###########################################################################################
-# sim_cancer_death 
-# Author: 
-# Function to simulate the time of cancer-specific death
-# INPUTS: 
+#' Simulate a time of cancer death for a specific cancer in a specific stage based on provided survival distributions.
+#' Uses the inverse CDF method.
 #' @param the_stage stage at clinical diagnosis
 #' @param the_cancer_site cancer site (one of "Anus","Breast","Bladder","Colorectal","Esophagus","Headandneck","Gastric","Liver" ,"Lung","Pancreas", "Prostate", "Renal", "Ovary", "Uterine")
 #' @param the_sex Male or Female
