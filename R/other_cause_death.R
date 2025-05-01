@@ -26,9 +26,10 @@ library(devtools)
 filter_multiple_cancers <- function(data, cancer_sites) {
   
   filtered_data <-  data %>% mutate(cancer_site=case_when(
+    `ICD-10 113 Cause List`==   "Malignant neoplasms of anus(C21)" ~ "Anus",
     `ICD-10 113 Cause List`== "Malignant neoplasm of bladder (C67)" ~ "Bladder",
     `ICD-10 113 Cause List`==  "Malignant neoplasm of breast (C50)" ~ "Breast",
-    `ICD-10 113 Cause List`==   "Malignant neoplasms of colon, rectum and anus (C18-C21)" ~ "Colorectal",
+    `ICD-10 113 Cause List`==   "Malignant neoplasms of colon, and rectum(C18, C19)" ~ "Colorectal",
     `ICD-10 113 Cause List`==    "Malignant neoplasm of esophagus (C15)" ~ "Esophagus",
     `ICD-10 113 Cause List`==   "Malignant neoplasm of stomach (C16)" ~ "Gastric",
     `ICD-10 113 Cause List`=="Malignant neoplasms of lip, oral cavity and pharynx (C00-C14)" ~"Headandneck",
@@ -43,6 +44,7 @@ filter_multiple_cancers <- function(data, cancer_sites) {
     filter(cancer_site %in% cancer_sites)
   return(filtered_data)
 }
+
 
 #' Adjust all-cause mortality to estimate other-cause mortality rates
 #'
@@ -165,6 +167,38 @@ get_other_cause_mortality <- function(all_cause_cdc, MCED_cdc, hmd_data, selecte
   
   return(other_cause_death_rate)
 }
+
+make_othercause_death_table <- function(all_cause_cdc, MCED_cdc, hmd_data, selected_cancers, 
+                                        the_sex, the_year, the_starting_age) {
+  
+  othercause_surv=get_other_cause_mortality(all_cause_cdc = all_cause_cdc, MCED_cdc = MCED_cdc, 
+                            hmd_data = hmd_data, selected_cancers = selected_cancers) %>%
+    filter(sex == the_sex, year == the_year)%>%
+    mutate(surv=cumprod(1-other_cause_rate/100000))%>%
+    mutate(surv=ifelse(age<=the_starting_age, 1, surv/surv[age==the_starting_age]))
+  
+  
+  
+  return(othercause_surv)
+  
+}
+
+
+sim_othercause_death <- function(othercause_death_table) {
+  
+   the_time=gettime(time = othercause_death_table$age, surv = othercause_death_table$surv)
+  
+   return(the_time)
+  
+}
+
+
+
+
+
+
+
+
 
 
 

@@ -11,7 +11,7 @@ gettime<-function(time,surv){
   
   eventtime=approx(x=cdf, y=time, xout=unif1, rule=2)$y
   
-  eventstatus=1
+  eventstatus=ifelse(eventtime==max(time),0,1)
  
   return(data.frame(time = eventtime, status = eventstatus))
 }
