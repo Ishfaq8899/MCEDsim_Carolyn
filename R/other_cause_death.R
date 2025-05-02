@@ -2,7 +2,7 @@
 library(readxl)
 library(dplyr)
 library(tidyr)
-library(devtools)
+#library(devtools)
 
 #' Filter MCED cancer data for selected cancer types
 #'
@@ -87,50 +87,51 @@ filter_multiple_cancers <- function(data, cancer_sites) {
 #' "Bladder"
 #' )
 #' get_other_cause_mortality <- adjusted_all_cause_mortality(all_cause_cdc, MCED_cdc, hmd_data, selected_cancers)
-get_other_cause_mortality <- function(all_cause_cdc, MCED_cdc, hmd_data, selected_cancers) {
+ get_other_cause_mortality <- function(all_cause_cdc, MCED_cdc, hmd_data, selected_cancers) {
   
   # Filter the MCED data for the selected cancers
-  filtered_cancer_data <- filter_multiple_cancers(data=MCED_cdc, cancer_sites=selected_cancers)
+  filtered_cancer_data <- filter_multiple_cancers(data = MCED_cdc, cancer_sites = selected_cancers)
   
-  # Convert HMD data to long format for easier processing
-  hmd_data_long <- hmd_data %>%
-    pivot_longer(cols = c(Female, Male), names_to = "Gender", values_to = "Population") %>%
-    filter(Year %in% 2018:2022) %>%
-    select(Year, Age, Gender, Population) %>%
+  # Convert HMD data to long format for easier processing  
+  hmd_data_long <- hmd_data %>% 
+    pivot_longer(cols = c(Female, Male), names_to = "Gender", values_to = "Population") %>% 
+    filter(Year %in% 2018:2022) %>% 
+    select(Year, Age, Gender, Population) %>% 
     mutate(Age = as.numeric(Age))
   
-  # Process all cause CDC and HMD data to generate all cause death rates
-  all_cause_death_rate <- all_cause_cdc %>%
-    rename(Age = `Single-Year Ages Code`) %>%
-    rename(all_crude_Rate = `Crude Rate`) %>%
-    select(Notes, Age, Gender, Year, Deaths, Population, all_crude_Rate)%>%
-    filter(!(is.na(all_crude_Rate))) %>%
-    filter(!(is.na(Gender))) %>%
-    filter(!(is.na(Year)))
+  # Process all cause CDC and HMD data to generate all cause death rates 
+  all_cause_death_rate <- all_cause_cdc %>% 
+    rename(Age = `Single-Year Ages Code`) %>% 
+    rename(all_crude_Rate = `Crude Rate`) %>% 
+    select(Notes, Age, Gender, Year, Deaths, Population, all_crude_Rate)
+  # %>% filter(!is.na(all_crude_Rate), !is.na(Gender), !is.na(Year))
   
   
   all_cause_death_rate<- all_cause_death_rate %>%
     left_join(hmd_data_long %>% filter(Age > 84), by = c("Year", "Age", "Gender"), suffix = c("", "_hmd")) %>%
-    mutate(Population = ifelse(is.na(Population), Population_hmd, Population)) %>%
-    select(-Population_hmd) %>%
-    mutate(all_crude_Rate = ifelse(Age > 84, (Deaths / Population) * 100000, all_crude_Rate)) %>%
-    mutate(Type = "All-cause death rates")
+    mutate(Population = ifelse(is.na(Population), Population_hmd, Population)) %>% 
+    select(-Population_hmd) %>% 
+    mutate(all_crude_Rate = ifelse(Age > 84, (Deaths / Population) * 100000, all_crude_Rate)) %>% 
+    rename(sex = Gender, age = Age, year = Year) %>%
+    mutate(Type = "All-cause death rates") %>% 
+    filter(!is.na(all_crude_Rate), !is.na(sex), !is.na(year))
   
   # Convert all-cause death rates to probabilities
-  all_cause_death_probability <- all_cause_death_rate %>%
-    mutate(all_death_probability = (all_crude_Rate / 100000) / (1 + 0.5 * all_crude_Rate / 100000)) %>%
+  all_cause_death_probability <- all_cause_death_rate %>% 
+    mutate(all_death_probability = (all_crude_Rate / 100000) / (1 + 0.5 * all_crude_Rate / 100000)) %>% 
     mutate(Type = "All-cause death probability")
   
   # Process MCED CDC and HMD cancer data to generate MCED cancer death rates
-  MCED_cancer_death_rate <- filtered_cancer_data %>%
-    rename(Age = `Single-Year Ages Code`, Gender = Sex) %>%
-    select(Year, Age, Gender, cancer_site, Deaths, Population) %>%
-    left_join(hmd_data_long %>% filter(Age > 84), by = c("Year", "Age", "Gender"), suffix = c("", "_hmd")) %>%
-    mutate(Population = ifelse(is.na(Population), Population_hmd, Population)) %>%
-    select(-Population_hmd) %>%
-    mutate(crude_Rate =  (Deaths / Population) * 100000) %>%
-    mutate(crude_Rate = as.numeric(crude_Rate)) %>%
-    group_by(Year, Age, Gender) %>%
+  MCED_cancer_death_rate <- filtered_cancer_data %>% 
+    rename(Age = `Single-Year Ages Code`, Gender = Sex) %>% 
+    select(Year, Age, Gender, cancer_site, Deaths, Population) %>% 
+    left_join(hmd_data_long %>% filter(Age > 84), by = c("Year", "Age", "Gender"), suffix = c("", "_hmd")) %>% 
+    mutate(Population = ifelse(is.na(Population), Population_hmd, Population)) %>% 
+    select(-Population_hmd) %>% 
+    mutate(crude_Rate =  (Deaths / Population) * 100000) %>% 
+    mutate(crude_Rate = as.numeric(crude_Rate)) %>% 
+    rename(sex = Gender, age = Age, year = Year) %>%
+    group_by(year, age, sex) %>% 
     summarize(
       MCED_Deaths = sum(Deaths, na.rm = TRUE),
       Population = first(Population),
@@ -139,30 +140,26 @@ get_other_cause_mortality <- function(all_cause_cdc, MCED_cdc, hmd_data, selecte
     )
   
   # Convert MCED cancer death rates to probabilities
-  MCED_cause_death_probability <- all_cause_death_rate %>%
-    left_join(MCED_cancer_death_rate %>% select(Year, Age, Gender, MCED_crude_Rate), by = c("Year", "Age", "Gender")) %>%
-    mutate(MCED_death_probability = (MCED_crude_Rate / 100000) / (1 + 0.5 * all_crude_Rate / 100000)) %>%
-    select(Age, Gender, Year, all_crude_Rate, MCED_crude_Rate, MCED_death_probability)
-  
+  MCED_cause_death_probability <- all_cause_death_rate %>% 
+    left_join(MCED_cancer_death_rate %>% select(year, age, sex, MCED_crude_Rate), by = c("year", "age", "sex")) %>% 
+    mutate(MCED_death_probability = (MCED_crude_Rate / 100000) / (1 + 0.5 * all_crude_Rate / 100000)) %>% 
+    select(age, sex, year, all_crude_Rate, MCED_crude_Rate, MCED_death_probability)
   
   
   # Compute probability of death from causes other than MCED cancers
-  other_cause_death_probability <- all_cause_death_probability %>%
-    left_join(MCED_cause_death_probability %>% select(Year, Age, Gender, MCED_death_probability), by = c("Year", "Age", "Gender")) %>%
+  other_cause_death_probability <- all_cause_death_probability %>% 
+    left_join(MCED_cause_death_probability %>% select(year, age, sex, MCED_death_probability), by = c("year", "age", "sex")) %>% 
     mutate(other_cause_probability = if_else(is.na(MCED_death_probability),
                                              all_death_probability,
-                                             all_death_probability - MCED_death_probability)) %>%
-    select(Age, Gender, Year, all_death_probability, MCED_death_probability, other_cause_probability) %>%
+                                             all_death_probability - MCED_death_probability)) %>% 
+    select(age, sex, year, all_death_probability, MCED_death_probability, other_cause_probability) %>% 
     mutate(Type = "Other-cause death probability")
   
   
-  
-  
   # Convert other cause death probabilities to rates
-  other_cause_death_rate <- other_cause_death_probability %>%
-    mutate(other_cause_rate = (other_cause_probability / (1 - 0.5 * other_cause_probability)) * 100000) %>%
-    rename(sex = Gender, age = Age, year = Year) %>%
-    select(age, sex, year, other_cause_rate) %>%
+  other_cause_death_rate <- other_cause_death_probability %>% 
+    mutate(other_cause_rate = (other_cause_probability / (1 - 0.5 * other_cause_probability)) * 100000) %>% 
+    select(age, sex, year, other_cause_rate) %>% 
     mutate(Type = "Other-cause death rate")
   
   return(other_cause_death_rate)
@@ -185,7 +182,6 @@ make_othercause_death_table <- function(all_cause_cdc, MCED_cdc, hmd_data, selec
 
 
 sim_othercause_death <- function(othercause_death_table) {
-  
    the_time=gettime(time = othercause_death_table$age, surv = othercause_death_table$surv)
   
    return(the_time)
