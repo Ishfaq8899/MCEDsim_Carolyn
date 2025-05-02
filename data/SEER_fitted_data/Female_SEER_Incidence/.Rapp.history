@@ -1,0 +1,3 @@
+load("/Users/ahmadish/Desktop/OHSU projects/Ishfaq folder/MCED_CRC/SEER incidence files/Updated_female_incidence/Female_Lung.Rdata")
+ls()
+metadata
