@@ -2,7 +2,7 @@
 library(readxl)
 library(dplyr)
 library(tidyr)
-#library(devtools)
+library(devtools)
 
 #' Filter MCED cancer data for selected cancer types
 #'
@@ -165,6 +165,41 @@ filter_multiple_cancers <- function(data, cancer_sites) {
   return(other_cause_death_rate)
 }
 
+################################################# 
+
+#' Create a table of other-cause death survival probabilities
+#' 
+#' This function generates a table of survival probabilities for causes other than selected (MCED) cancers. 
+#' Its uses the output from the `get_other_cause_mortality` function and filters it based on the specified 
+#' sex, year, and starting age. 
+#'
+ #' @param all_cause_cdc A data frame with all-cause mortality data from the CDC. This data frame should
+ #'                      include columns: "Single-Year Ages Code", "Gender", "Year", "Deaths", "Population", 
+ #'                      "Crude Rate".
+ #' @param MCED_cdc A data frame with cancer-specific mortality data from the CDC. This data frame should
+ #'                    include columns: "Single-Year Ages Code", "Sex", "Year", "ICD-10 113 Cause List",
+ #'                    "ICD-10 113 Cause List Code", "Deaths", "Population", "Crude Rate".
+ #' @param hmd_data A data frame with population data from HMD. This data frame should include columns:
+ #'                  "Year", "Age", "Female", "Male", "Total".
+ #' @param selected_cancers A character vector specifying the cancer types to analyze.
+ #'                         These names include: "Anus", "Bladder", "Breast", "Colorectal", "Esophagus", "Gastric", 
+ #'                         "Headandneck", "Liver", "Lung", "Ovary", "Pancreas", "Prostate", "Renal", "Uterine".
+ #'                         
+ #'                         
+#' @param the_sex  A character string specifying the sex to filter by ("Male" or "Female").
+#' @param the_year An integer specoifying the year to filter by. 
+#' @param the_starting_age An integer specifying the starting age for the survival probabilities. 
+#'
+ #' @return A data frame with survival probabilities for causes other than the selected cancers.
+ #'         Includes columns: age, sex, year, other_cause_rate, surv.
+ #' @export
+ #' @examples
+ #' all_cause_cdc <- read_excel("/path/to/cdc_all_cause_2018_2022.xlsx")
+ #' MCED_cdc <- read_excel("/path/to/modified_MCED_data.xlsx")
+ #' hmd_data <- read_excel("/path/to/hmd_population_1933_2023.xlsx")
+ #' selected_cancers <- c("Anus", "Bladder", "Breast", "Colorectal", "Esophagus", "Gastric", "Headandneck",
+ #'                       "Liver", "Lung", "Ovary", "Pancreas", "Prostate", "Renal", "Uterine")
+ #' othercause_surv <- make_othercause_death_table(all_cause_cdc, MCED_cdc, hmd_data, selected_cancers, "Female", 2019, 60)
 make_othercause_death_table <- function(all_cause_cdc, MCED_cdc, hmd_data, selected_cancers, 
                                         the_sex, the_year, the_starting_age) {
   
@@ -174,13 +209,23 @@ make_othercause_death_table <- function(all_cause_cdc, MCED_cdc, hmd_data, selec
     mutate(surv=cumprod(1-other_cause_rate/100000))%>%
     mutate(surv=ifelse(age<=the_starting_age, 1, surv/surv[age==the_starting_age]))
   
-  
-  
   return(othercause_surv)
   
 }
 
-
+ #' Simulate other-cause death time
+ #'
+ #' This function simulates the time to death from causes other than the selected (MCED) cancers
+ #' using the survival probabilities from the `make_othercause_death_table` function.
+ #'
+ #' @param othercause_death_table A data frame with survival probabilities for causes other than the selected cancers.
+ #'                               Includes columns: age, sex, year, other_cause_rate, surv.
+ #'
+ #' @return A numeric value representing the simulated time to death from other causes.
+ #' @export
+ #' @examples
+ #' othercause_death_table <- make_othercause_death_table(all_cause_cdc, MCED_cdc, hmd_data, selected_cancers, "Female", 2019, 60)
+ #' sim_time <- sim_othercause_death(othercause_death_table)
 sim_othercause_death <- function(othercause_death_table) {
    the_time=gettime(time = othercause_death_table$age, surv = othercause_death_table$surv)
   
