@@ -166,7 +166,6 @@ filter_multiple_cancers <- function(data, cancer_sites) {
 }
 
 ################################################# 
-
 #' Create a table of other-cause death survival probabilities
 #' 
 #' This function generates a table of survival probabilities for causes other than selected (MCED) cancers. 
