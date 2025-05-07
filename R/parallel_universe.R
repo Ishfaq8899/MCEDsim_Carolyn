@@ -17,7 +17,25 @@ get_rates_list<-function(the_omst, the_lmst, all_meta_data_fits,all_fits,the_can
   return(list(rates_list=rates_list,cancer_sites=cancer_sites))
 }
 
+# Function to initialize the state based on the rate matrix and a given time a1
+get_init<-function(rate.matrix,a1){
+  
+  k=dim(rate.matrix)[1]
+  init=vector()
+  init[k]=0
+  init[k-1]=0
+  
+  prob_mat_a1=MatrixExp(t=a1,mat=rate.matrix)
+  denom=1-prob_mat_a1[1,(k-1)]-prob_mat_a1[1,(k)]
+  for(j in 1:(k-2)){
+    init[j]=prob_mat_a1[1,j]/denom
+  }
+  
+  init_state=sample(1:k,size=1,prob=init)
+  return(init_state)
+}
 
+# Function to run the simulation
 run_simulation_parallel_universe(cancer_sites,  
                                 LMST_vec,
                                 OMST_vec,
@@ -55,23 +73,38 @@ run_simulation_parallel_universe(cancer_sites,
 
   
   #simulate males
-  sim_multiple_cancer_multiple_individuals(num_individuals=num_males, 
-                                           cancer_sites=sites_male, 
-                                           rate_matrices=rates_list_male,
-                                           early_sensitivities=test_performance_male$early_sens,
-                                           late_sensitivities = test_performance_male$late_sens,
-                                           specificities = test_performance_male$specificities,
-                                           obs.times, 
-                                           end.time,
-                                           start.time, start.state)
-    
-  #simulate females
+  sim_males = sim_multiple_cancer_multiple_individuals(num_individuals = num_males,  
+                                                       cancer_sites = sites_male,  
+                                                       rate_matrices = rates_list_male,
+                                                       early_sensitivities = test_performance_male$early_sens,
+                                                       late_sensitivities = test_performance_male$late_sens,
+                                                       specificities = test_performance_male$specificities,
+                                                       obs.times = screening_times,  
+                                                       end.time = 100,
+                                                       start.time = starting_age,
+                                                       start.state = sapply(rates_list_male, get_init, a1 = starting_age))
   
+  
+    
+  # Simulate females
+  sim_females = sim_multiple_cancer_multiple_individuals(num_individuals = num_females,  
+                                                         cancer_sites = sites_female,  
+                                                         rate_matrices = rates_list_female,
+                                                         early_sensitivities = test_performance_female$early_sens,
+                                                         late_sensitivities = test_performance_female$late_sens,
+                                                         specificities = test_performance_female$specificities,
+                                                         obs.times = screening_times,  
+                                                         end.time = 100,
+                                                         start.time = starting_age,
+                                                         start.state = sapply(rates_list_female, get_init, a1 = starting_age))
   
   #Extract the rate matrices corresponding to selected cancer sites and sojourn time inputs 
   #simulate multiple individuals 
-  #Compute different in life years with and without screening 
-  #Difference in late stage diagnosis with and without screening
+
+  # Combine results
+  results = list(males = sim_males, females = sim_females)
+  return(results)  
+  
 } 
 
 
