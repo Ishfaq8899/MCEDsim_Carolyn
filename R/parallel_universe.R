@@ -6,8 +6,12 @@ get_rates_list <- function(the_omst, the_lmst, all_meta_data_fits, all_fits, the
   the_indices <- all_meta_data_fits %>%
     filter(OMST %in% the_omst, LMST %in% the_lmst, cancer_site %in% the_cancer_site) %>%
     select("index")
-  
+ 
+  ###########################
   rates_list <- lapply(all_fits[unlist(the_indices)], "[[", "rate.matrix")
+  #For arrays: 
+  # rates_list <- all_fits[,,the_indices]
+  ###########################
   
   cancer_sites <- all_meta_data_fits %>%
     filter(OMST %in% the_omst, LMST %in% the_lmst, cancer_site %in% the_cancer_site) %>%
@@ -97,7 +101,7 @@ sim_individual_MCED<-function( ID,
 #
 #OUTPUTS: A data frame with the combined simulated data for multiple individuals.
 ############################################################################################
-sim_multi_individuals_MCED <- function(  cancer_sites,
+sim_multiple_individuals_MCED_parallel_universe <- function(  cancer_sites,
                                          LMST_vec, 
                                          OMST_vec, 
                                          test_performance_dataframe, 

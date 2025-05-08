@@ -201,11 +201,17 @@ get.obs.data.individual <- function(ID, rate.matrix, emission.matrix,
   clin_dx_early_state <- n_states - 1
   screen_early_state <- 2
   screen_late_state <- 3
-
+  
+  ################
+  pre_clin_early_state <- n_states - 3
+#####################
+  
   # Simulate CTMC trajectory for individual
   trajectory <- sim.ctmc(rate.matrix = rate.matrix, start.state = start.state, 
                          end.time = end.time, start.time = start.time)
 
+#  browser()
+  
   # Discretize states at observation times
   discrete.states <- discrete.ctmc(ctmc.times = trajectory$times,
                                    ctmc.states = trajectory$states,
