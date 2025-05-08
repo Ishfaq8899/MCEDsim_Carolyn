@@ -64,7 +64,7 @@ filter_multiple_cancers <- function(data, cancer_sites) {
 #' 8. Convert other cause death probabilities to rates using inverse formula of Rosenberg (2006).
 #'
 #'
-#' @param all_cause_cdc A data frame with all-cause mortality data from the CDC. This data frame should
+#' @param cdc_data A data frame with all-cause mortality data from the CDC. This data frame should
 #'                      include columns: "Single-Year Ages Code", "Gender", "Year", "Deaths", "Population", "Crude Rate".
 #' @param MCED_cdc A data frame with cancer-specific mortality data from the CDC. This data frame should
 #'                 include columns: "Single-Year Ages Code", "Sex", "Year", "ICD-10 113 Cause List",
@@ -79,15 +79,15 @@ filter_multiple_cancers <- function(data, cancer_sites) {
 #'         other than the selected cancers. Includes columns: age, sex, year, other_cause_rate.
 #' @export
 #' @examples
-#' all_cause_cdc <- read.csv("all_cause_cdc.csv")
+#' cdc_data <- read.csv("all_cause_cdc.csv")
 #' MCED_cdc <- read.csv("MCED_cdc.csv")
 #' hmd_data <- read.csv("hmd_data.csv")
 #' selected_cancers <- c(
 #' "Prostate",
 #' "Bladder"
 #' )
-#' get_other_cause_mortality <- adjusted_all_cause_mortality(all_cause_cdc, MCED_cdc, hmd_data, selected_cancers)
- get_other_cause_mortality <- function(all_cause_cdc, MCED_cdc, hmd_data, selected_cancers) {
+#' get_other_cause_mortality <- adjusted_all_cause_mortality(cdc_data, MCED_cdc, hmd_data, selected_cancers)
+ get_other_cause_mortality <- function(cdc_data, MCED_cdc, hmd_data, selected_cancers) {
   
   # Filter the MCED data for the selected cancers
   filtered_cancer_data <- filter_multiple_cancers(data = MCED_cdc, cancer_sites = selected_cancers)
@@ -100,7 +100,7 @@ filter_multiple_cancers <- function(data, cancer_sites) {
     mutate(Age = as.numeric(Age))
   
   # Process all cause CDC and HMD data to generate all cause death rates 
-  all_cause_death_rate <- all_cause_cdc %>% 
+  all_cause_death_rate <- cdc_data %>% 
     rename(Age = `Single-Year Ages Code`) %>% 
     rename(all_crude_Rate = `Crude Rate`) %>% 
     select(Notes, Age, Gender, Year, Deaths, Population, all_crude_Rate)
@@ -172,7 +172,7 @@ filter_multiple_cancers <- function(data, cancer_sites) {
 #' Its uses the output from the `get_other_cause_mortality` function and filters it based on the specified 
 #' sex, year, and starting age. 
 #'
- #' @param all_cause_cdc A data frame with all-cause mortality data from the CDC. This data frame should
+ #' @param cdc_data A data frame with all-cause mortality data from the CDC. This data frame should
  #'                      include columns: "Single-Year Ages Code", "Gender", "Year", "Deaths", "Population", 
  #'                      "Crude Rate".
  #' @param MCED_cdc A data frame with cancer-specific mortality data from the CDC. This data frame should
@@ -193,16 +193,16 @@ filter_multiple_cancers <- function(data, cancer_sites) {
  #'         Includes columns: age, sex, year, other_cause_rate, surv.
  #' @export
  #' @examples
- #' all_cause_cdc <- read_excel("/path/to/cdc_all_cause_2018_2022.xlsx")
+ #' cdc_data <- read_excel("/path/to/cdc_all_cause_2018_2022.xlsx")
  #' MCED_cdc <- read_excel("/path/to/modified_MCED_data.xlsx")
  #' hmd_data <- read_excel("/path/to/hmd_population_1933_2023.xlsx")
  #' selected_cancers <- c("Anus", "Bladder", "Breast", "Colorectal", "Esophagus", "Gastric", "Headandneck",
  #'                       "Liver", "Lung", "Ovary", "Pancreas", "Prostate", "Renal", "Uterine")
- #' othercause_surv <- make_othercause_death_table(all_cause_cdc, MCED_cdc, hmd_data, selected_cancers, "Female", 2019, 60)
-make_othercause_death_table <- function(all_cause_cdc, MCED_cdc, hmd_data, selected_cancers, 
+ #' othercause_surv <- make_othercause_death_table(cdc_data, MCED_cdc, hmd_data, selected_cancers, "Female", 2019, 60)
+make_othercause_death_table <- function(cdc_data, MCED_cdc, hmd_data, selected_cancers, 
                                         the_sex, the_year, the_starting_age) {
   
-  othercause_surv=get_other_cause_mortality(all_cause_cdc = all_cause_cdc, MCED_cdc = MCED_cdc, 
+  othercause_surv=get_other_cause_mortality(cdc_data = cdc_data, MCED_cdc = MCED_cdc, 
                             hmd_data = hmd_data, selected_cancers = selected_cancers) %>%
     filter(sex == the_sex, year == the_year)%>%
     mutate(surv=cumprod(1-other_cause_rate/100000))%>%
@@ -223,7 +223,7 @@ make_othercause_death_table <- function(all_cause_cdc, MCED_cdc, hmd_data, selec
  #' @return A numeric value representing the simulated time to death from other causes.
  #' @export
  #' @examples
- #' othercause_death_table <- make_othercause_death_table(all_cause_cdc, MCED_cdc, hmd_data, selected_cancers, "Female", 2019, 60)
+ #' othercause_death_table <- make_othercause_death_table(cdc_data, MCED_cdc, hmd_data, selected_cancers, "Female", 2019, 60)
  #' sim_time <- sim_othercause_death(othercause_death_table)
 sim_othercause_death <- function(othercause_death_table) {
    the_time=gettime(time = othercause_death_table$age, surv = othercause_death_table$surv)
