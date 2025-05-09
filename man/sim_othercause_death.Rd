@@ -18,6 +18,6 @@ This function simulates the time to death from causes other than the selected (M
 using the survival probabilities from the `make_othercause_death_table` function.
 }
 \examples{
-othercause_death_table <- make_othercause_death_table(all_cause_cdc, MCED_cdc, hmd_data, selected_cancers, "Female", 2019, 60)
+othercause_death_table <- make_othercause_death_table(cdc_data, MCED_cdc, hmd_data, selected_cancers, "Female", 2019, 60)
 sim_time <- sim_othercause_death(othercause_death_table)
 }

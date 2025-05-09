@@ -5,7 +5,7 @@
 \title{Create a table of other-cause death survival probabilities}
 \usage{
 make_othercause_death_table(
-  all_cause_cdc,
+  cdc_data,
   MCED_cdc,
   hmd_data,
   selected_cancers,
@@ -15,7 +15,7 @@ make_othercause_death_table(
 )
 }
 \arguments{
-\item{all_cause_cdc}{A data frame with all-cause mortality data from the CDC. This data frame should
+\item{cdc_data}{A data frame with all-cause mortality data from the CDC. This data frame should
 include columns: "Single-Year Ages Code", "Gender", "Year", "Deaths", "Population", 
 "Crude Rate".}
 
@@ -46,10 +46,10 @@ Its uses the output from the `get_other_cause_mortality` function and filters it
 sex, year, and starting age.
 }
 \examples{
-all_cause_cdc <- read_excel("/path/to/cdc_all_cause_2018_2022.xlsx")
+cdc_data <- read_excel("/path/to/cdc_all_cause_2018_2022.xlsx")
 MCED_cdc <- read_excel("/path/to/modified_MCED_data.xlsx")
 hmd_data <- read_excel("/path/to/hmd_population_1933_2023.xlsx")
 selected_cancers <- c("Anus", "Bladder", "Breast", "Colorectal", "Esophagus", "Gastric", "Headandneck",
                       "Liver", "Lung", "Ovary", "Pancreas", "Prostate", "Renal", "Uterine")
-othercause_surv <- make_othercause_death_table(all_cause_cdc, MCED_cdc, hmd_data, selected_cancers, "Female", 2019, 60)
+othercause_surv <- make_othercause_death_table(cdc_data, MCED_cdc, hmd_data, selected_cancers, "Female", 2019, 60)
 }

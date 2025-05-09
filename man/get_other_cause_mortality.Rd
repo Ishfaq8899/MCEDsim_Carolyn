@@ -4,10 +4,10 @@
 \alias{get_other_cause_mortality}
 \title{Adjust all-cause mortality to estimate other-cause mortality rates}
 \usage{
-get_other_cause_mortality(all_cause_cdc, MCED_cdc, hmd_data, selected_cancers)
+get_other_cause_mortality(cdc_data, MCED_cdc, hmd_data, selected_cancers)
 }
 \arguments{
-\item{all_cause_cdc}{A data frame with all-cause mortality data from the CDC. This data frame should
+\item{cdc_data}{A data frame with all-cause mortality data from the CDC. This data frame should
 include columns: "Single-Year Ages Code", "Gender", "Year", "Deaths", "Population", "Crude Rate".}
 
 \item{MCED_cdc}{A data frame with cancer-specific mortality data from the CDC. This data frame should
@@ -43,12 +43,12 @@ The function performs several steps:
 8. Convert other cause death probabilities to rates using inverse formula of Rosenberg (2006).
 }
 \examples{
-all_cause_cdc <- read.csv("all_cause_cdc.csv")
+cdc_data <- read.csv("all_cause_cdc.csv")
 MCED_cdc <- read.csv("MCED_cdc.csv")
 hmd_data <- read.csv("hmd_data.csv")
 selected_cancers <- c(
 "Prostate",
 "Bladder"
 )
-get_other_cause_mortality <- adjusted_all_cause_mortality(all_cause_cdc, MCED_cdc, hmd_data, selected_cancers)
+get_other_cause_mortality <- adjusted_all_cause_mortality(cdc_data, MCED_cdc, hmd_data, selected_cancers)
 }
