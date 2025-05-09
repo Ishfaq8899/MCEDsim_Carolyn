@@ -42,7 +42,7 @@ sim_cancer_death <- function(the_stage, the_cancer_site, the_sex,the_model_type,
   return(death_time)
 }
 
-#' Simulate a time of cancer death for a specific cancer in a specific stage based on provided survival distributions.
+#' Simulate a time of cancer death for a specific cancer in a specific stage based on provided parametric survival distributions.
 #' 
 #' @param the_stage stage at clinical diagnosis
 #' @param the_cancer_site cancer site (one of "Anus","Breast","Bladder","Colorectal","Esophagus","Headandneck","Gastric","Liver" ,"Lung","Pancreas", "Prostate", "Renal", "Ovary", "Uterine")
@@ -69,5 +69,4 @@ sim_cancer_death_param <- function(the_stage, the_cancer_site, the_sex,the_model
   death_time=rsurv(the_survobj,n=1)
   return(death_time)
 }
-
 

@@ -159,6 +159,41 @@ sim_multiple_individuals_MCED_parallel_universe <- function(  cancer_sites,
   return(combined_results)
 }
 
+###########################################################################################
+#generate_ovarian_death
+#Author: 
+# Function to generate the simulated time of ovarian cancer death based on the diagnosis stage and type
+#
+# INPUTS: 
+#     screen_diagnosis_time: Time of diagnosis via screening 
+#     screen_diagnosis_stage: Stage at diagnosis via screening
+#     clinical_diagnosis_time: Time of diagnosis via clinical symptoms
+#     clinical_diagnosis_stage: Stage at diagnosis via clinical symptoms
+#     cancer_site: Cancer site (HGSC or nonHGSC)
+#     ovarian_survival_dist: Data frame containing ovarian survival distribution
+#
+#OUTPUTS: A numeric value representing the simulated time of death due to ovarian cancer
+#################################################################################################
+generate_ovarian_death<-function(screen_diagnosis_time,screen_diagnosis_stage,clinical_diagnosis_time,
+                                 clinical_diagnosis_stage,cancer_site,ovarian_survival_dist){
+  #  browser()
+  
+  if(!is.na(clinical_diagnosis_time)){
+    if(!is.na(screen_diagnosis_stage)&screen_diagnosis_stage=="early"){
+      the_stage="early"
+    }else{
+      the_stage=clinical_diagnosis_stage
+    }
+    ovarian_death=sim_ovarian_death(age_clin_dx=clinical_diagnosis_time, stage_dx=the_stage, 
+                                    type=cancer_site, ovarian_survival_dist=ovarian_survival_dist)
+  }else{
+    ovarian_death=NA
+  }
+  
+  return(ovarian_death=ovarian_death)
+}
+
+
 
 
 
