@@ -38,22 +38,40 @@ sim_individual_MCED<-function( ID,
                                         specificities = test_performance$specificities,
                                         obs.times = screen_times,
                                         start.time = starting_age,
-                                        end.time = 100, 
+                                        end.time = 500, 
                                         start.states =  start_states) 
-    
+  
   # result$death_time_ovarian_cancer=mapply(FUN="generate_ovarian_death",result$screen_diagnosis_time,
   #                                         result$screen_diagnosis_stage,result$clinical_diagnosis_time,
   #                                         result$clinical_diagnosis_stage,
   #                                         result$cancer_site,MoreArgs=list(ovarian_survival_dist))
   # 
   # result$arm = arm
-#  browser()
-  result$other_cause_death_status=other_cause_death_time$status
-  result$other_cause_death_time=other_cause_death_time$time
-  return(result)
-  
-}  
 
+#-----------------------  
+# Ishfaq modification   
+#-----------------------
+# Identify first cancer by onset time
+if ("onset_time" %in% names(result)) {
+  first_cancer_row <- result %>%
+    filter(!is.na(onset_time)) %>%
+# selects the single row with the earliest (smallest) onset_time.    
+  slice_min(order_by = onset_time, n = 1, with_ties = FALSE)
+  
+  result <- result %>%
+    mutate(is_first_cancer = (cancer_site == first_cancer_row$cancer_site[1] &
+                                onset_time == first_cancer_row$onset_time[1]))
+} else {
+  result$is_first_cancer <- FALSE
+}
+#-----------------------  
+
+# Add other-cause death info
+result$other_cause_death_status <- other_cause_death_time$status
+result$other_cause_death_time <- other_cause_death_time$time
+
+return(result)
+}
 
 ###########################################################################################
 #sim_multi_individuals_MCED
