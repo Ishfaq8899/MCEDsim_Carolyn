@@ -14,13 +14,15 @@ sim_individual_MCED<-function( ID,
                                other_cause_death_dist,
                                starting_age,
                                num_screens,
-                               screen_interval
-                               #cause_specific_mortality
+                               screen_interval,
+                               end_time,
+                               sex,
+                               surv_param_table
                                ){
   
   # simulate time of other cause death 
 
-  other_cause_death_time = sim_othercause_death(other_cause_death_dist)
+  other_cause_death = sim_othercause_death(other_cause_death_dist)
   
   
   # Get the starting states for each cancer
@@ -29,48 +31,69 @@ sim_individual_MCED<-function( ID,
   ### get the screening times
   screen_times = seq((starting_age),(num_screens + starting_age-1), by=screen_interval)
   
+  #number of cancer sites
+  num_sites=length(cancer_sites)
  
   result <- sim_multiple_cancer_indiv(ID = ID,
                                         cancer_sites = cancer_sites,
                                         rate_matrices = rates_list,
                                         early_sensitivities = test_performance$early_sens,
                                         late_sensitivities =  test_performance$late_sens,
-                                        specificities = test_performance$specificities,
+                                        specificities = test_performance$specificities/num_sites,
                                         obs.times = screen_times,
                                         start.time = starting_age,
-                                        end.time = 500, 
+                                        end.time = end_time, 
                                         start.states =  start_states) 
   
-  # result$death_time_ovarian_cancer=mapply(FUN="generate_ovarian_death",result$screen_diagnosis_time,
-  #                                         result$screen_diagnosis_stage,result$clinical_diagnosis_time,
-  #                                         result$clinical_diagnosis_stage,
-  #                                         result$cancer_site,MoreArgs=list(ovarian_survival_dist))
-  # 
-  # result$arm = arm
-
-#-----------------------  
-# Ishfaq modification   
-#-----------------------
-# Identify first cancer by onset time
-if ("onset_time" %in% names(result)) {
-  first_cancer_row <- result %>%
-    filter(!is.na(onset_time)) %>%
-# selects the single row with the earliest (smallest) onset_time.    
-  slice_min(order_by = onset_time, n = 1, with_ties = FALSE)
+  # Add other-cause death info
+  result$other_cause_death_status <- other_cause_death$status
+  result$other_cause_death_time <- other_cause_death$time
   
-  result <- result %>%
-    mutate(is_first_cancer = (cancer_site == first_cancer_row$cancer_site[1] &
-                                onset_time == first_cancer_row$onset_time[1]))
-} else {
-  result$is_first_cancer <- FALSE
-}
-#-----------------------  
+  #-----------------------  
+  # Identify first cancer by onset time
+  #-----------------------
+  result$is_first_cancer=FALSE
+  result$cancer_death_time_no_screen=NA
 
-# Add other-cause death info
-result$other_cause_death_status <- other_cause_death_time$status
-result$other_cause_death_time <- other_cause_death_time$time
+  if (!is.na(min(result$onset_time,na.rm=T))) {
+    
+    first_cancer_row <- result %>%
+      filter(!is.na(onset_time)) %>%
+      # selects the single row with the earliest (smallest) onset_time.    
+      slice_min(order_by = onset_time, n = 1, with_ties = FALSE)%>%mutate(is_first_cancer=TRUE)
+  
+    #Simulate time of death for first cancer without screening and with screening
+    #if stage at clinical diagnosis is same as stage at screen diagnosis, then cancer_death_time_screen=cancer_death_time_no_screen
+    #if it is different, then cancer_death_time_screen=clinical_diagnosis_time+sim_cancer_death_param(the_stage=screen_diagnosis_stage,
+                                                       # the_cancer_site=cancer_site,
+                                                       #the_sex=sex,
+                                                      #the_model_type="Loglogistic",
+                                                       #param_table=surv_param_table)
+    
+    first_cancer_row <-first_cancer_row  %>%mutate(cancer_death_time_no_screen=ifelse(is_first_cancer,clinical_diagnosis_time+sim_cancer_death_param(the_stage=clinical_diagnosis_stage,
+                                                                                                       the_cancer_site=cancer_site,
+                                                                                                       the_sex=sex,
+                                                                                                       the_model_type="Loglogistic",
+                                                                                                       param_table=surv_param_table),NA))%>%
+                    mutate(cancer_death_time_screen=ifelse(screen_diagnosis_stage==clinical_diagnosis_stage|is.na(screen_diagnosis_time),cancer_death_time_no_screen,
+                                                           clinical_diagnosis_time+sim_cancer_death_param(the_stage=screen_diagnosis_stage,
+                                                                                                          the_cancer_site=cancer_site,
+                                                                                                          the_sex=sex,
+                                                                                                          the_model_type="Loglogistic",
+                                                                                                          param_table=surv_param_table)))
+    
+   
+      result <- result %>%
+      mutate(is_first_cancer = (cancer_site == first_cancer_row$cancer_site[1] &
+                                  onset_time == first_cancer_row$onset_time[1]))%>%
+      mutate(cancer_death_time_no_screen=ifelse(is_first_cancer,first_cancer_row$cancer_death_time_no_screen,NA),
+             cancer_death_time_screen=ifelse(is_first_cancer,first_cancer_row$cancer_death_time_screen,NA))
+    
+  
+  } 
+  
 
-return(result)
+  return(result)
 }
 
 ###########################################################################################
@@ -86,6 +109,7 @@ sim_multiple_individuals_MCED_parallel_universe <- function(  cancer_sites,
                                          OMST_vec, 
                                          test_performance_dataframe, 
                                          starting_age,
+                                         ending_age,
                                          num_screens,
                                          screen_interval,
                                          num_males, 
@@ -96,9 +120,9 @@ sim_multiple_individuals_MCED_parallel_universe <- function(  cancer_sites,
                                          all_meta_data_male, 
                                          cdc_data, 
                                          hmd_data,
-                                         MCED_cdc
-                                         #survival tables
-                                         ){
+                                         MCED_cdc,
+                                         surv_param_table
+                                          ){
   
   
   # Creat a vector of IDs
@@ -152,10 +176,12 @@ sim_multiple_individuals_MCED_parallel_universe <- function(  cancer_sites,
                                          other_cause_death_dist=other_cause_death_male,
                                          starting_age=starting_age,
                                          num_screens=num_screens,
-                                         screen_interval=screen_interval),
+                                         screen_interval=screen_interval,
+                                         end_time=ending_age,
+                                         surv_param_table=surv_param_table,
+                                         sex="Male"),
                          SIMPLIFY = FALSE)
 
-  
   results_list_female <- mapply(sim_individual_MCED,
                                 ID = IDs_female,
                                 MoreArgs = list(rates_list=rates_list_female,
@@ -164,12 +190,15 @@ sim_multiple_individuals_MCED_parallel_universe <- function(  cancer_sites,
                                                 other_cause_death_dist=other_cause_death_female,
                                                 starting_age=starting_age,
                                                 num_screens=num_screens,
-                                                screen_interval=screen_interval),
+                                                screen_interval=screen_interval,
+                                                end_time=ending_age,
+                                                surv_param_table=surv_param_table,
+                                                sex="Female"),
                                 SIMPLIFY = FALSE)
   
   # Combine all individual results into one data frame
-  combined_results_males <- do.call(rbind, results_list_male)
-  combined_results_females <- do.call(rbind, results_list_female)
+  combined_results_males <- do.call(rbind, results_list_male)%>%mutate(sex="Male")
+  combined_results_females <- do.call(rbind, results_list_female)%>%mutate(sex="Female")
 
   combined_results =bind_rows(combined_results_males,combined_results_females)%>%
                    mutate(start_age=starting_age)
@@ -177,39 +206,6 @@ sim_multiple_individuals_MCED_parallel_universe <- function(  cancer_sites,
   return(combined_results)
 }
 
-###########################################################################################
-#generate_ovarian_death
-#Author: 
-# Function to generate the simulated time of ovarian cancer death based on the diagnosis stage and type
-#
-# INPUTS: 
-#     screen_diagnosis_time: Time of diagnosis via screening 
-#     screen_diagnosis_stage: Stage at diagnosis via screening
-#     clinical_diagnosis_time: Time of diagnosis via clinical symptoms
-#     clinical_diagnosis_stage: Stage at diagnosis via clinical symptoms
-#     cancer_site: Cancer site (HGSC or nonHGSC)
-#     ovarian_survival_dist: Data frame containing ovarian survival distribution
-#
-#OUTPUTS: A numeric value representing the simulated time of death due to ovarian cancer
-#################################################################################################
-generate_ovarian_death<-function(screen_diagnosis_time,screen_diagnosis_stage,clinical_diagnosis_time,
-                                 clinical_diagnosis_stage,cancer_site,ovarian_survival_dist){
-  #  browser()
-  
-  if(!is.na(clinical_diagnosis_time)){
-    if(!is.na(screen_diagnosis_stage)&screen_diagnosis_stage=="early"){
-      the_stage="early"
-    }else{
-      the_stage=clinical_diagnosis_stage
-    }
-    ovarian_death=sim_ovarian_death(age_clin_dx=clinical_diagnosis_time, stage_dx=the_stage, 
-                                    type=cancer_site, ovarian_survival_dist=ovarian_survival_dist)
-  }else{
-    ovarian_death=NA
-  }
-  
-  return(ovarian_death=ovarian_death)
-}
 
 
 

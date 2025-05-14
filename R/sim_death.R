@@ -48,12 +48,13 @@ sim_cancer_death <- function(the_stage, the_cancer_site, the_sex,the_model_type,
 #' @param the_cancer_site cancer site (one of "Anus","Breast","Bladder","Colorectal","Esophagus","Headandneck","Gastric","Liver" ,"Lung","Pancreas", "Prostate", "Renal", "Ovary", "Uterine")
 #' @param the_sex Male or Female
 #' @param the_model_type Weibull or  Loglogistic
-#' @param param_table_dist a data frame with columns: intercept (based on survreg fit), scale (based on survreg fit) site, stage, sex, model_type 
+#' @param param_table a data frame with columns: intercept (based on survreg fit), scale (based on survreg fit) site, stage, sex, model_type 
 #' @return A data frame with "time" and "status" elements, where status=1 indicates the event occurred. 
 #' @export
 sim_cancer_death_param <- function(the_stage, the_cancer_site, the_sex,the_model_type, param_table){
   
  
+
   # Filter the survival distribution based on the type and stage
   survival_dist_indiv = filter(param_table,cancer_site == paste(the_cancer_site), stage==paste(the_stage),
                                sex==paste(the_sex),model_type==paste(the_model_type))

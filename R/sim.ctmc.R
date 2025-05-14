@@ -204,18 +204,25 @@ get.obs.data.individual <- function(ID, rate.matrix, emission.matrix,
   
   ################
   pre_clin_early_state <- n_states - 3
+  pre_clin_late_state <- n_states -2
 #####################
   
+  #set random seed based on ID
+  set.seed(ID)
   # Simulate CTMC trajectory for individual
   trajectory <- sim.ctmc(rate.matrix = rate.matrix, start.state = start.state, 
                          end.time = end.time, start.time = start.time)
   
   onset_time=NA
+  late_onset_time=NA
 
   if(pre_clin_early_state%in%trajectory$states){
     onset_time=min(trajectory$times[trajectory$states==pre_clin_early_state])
   }
 
+  if(pre_clin_late_state%in%trajectory$states){
+    late_onset_time=min(trajectory$times[trajectory$states==pre_clin_late_state])
+  }
   
   # Discretize states at observation times
   discrete.states <- discrete.ctmc(ctmc.times = trajectory$times,
@@ -235,18 +242,17 @@ get.obs.data.individual <- function(ID, rate.matrix, emission.matrix,
   screen_diagnosis_time <- NA
   screen_diagnosis_stage <- NA
 
+  #Get clinical diagnosis time
   if (clin_dx_early_state %in% c(trajectory$states) || clin_dx_late_state %in% c(trajectory$states)) {
 
     clinical_diagnosis_index <- which(trajectory$states %in% c(clin_dx_early_state, clin_dx_late_state) == T)
     clinical_diagnosis_time <- trajectory$times[clinical_diagnosis_index]
     clinical_diagnosis_stage <- trajectory$states[clinical_diagnosis_index]
     
-    clinical_diagnosis_stage <- ifelse(clinical_diagnosis_stage == clin_dx_early_state, "early", "late")  
+    clinical_diagnosis_stage <- ifelse(clinical_diagnosis_stage == clin_dx_early_state, "Early", "Late")  
   }
 
-  #if(!is.na(clinical_diagnosis_time)&(clinical_diagnosis_time>60 & clinical_diagnosis_time<70)){
-  #  browser()
-  #}
+  #Get screen diagnosis time
   if (screen_early_state %in% c(observed.data$obs.data) || screen_late_state %in% c(observed.data$obs.data)) {
 
     # Need to fix this so it works with false positives. Currently does not work!
@@ -254,11 +260,24 @@ get.obs.data.individual <- function(ID, rate.matrix, emission.matrix,
     screen_diagnosis_time <- observed.data$obs.times[screen_diagnosis_index]
     screen_diagnosis_stage <- observed.data$obs.data[screen_diagnosis_index]
     
-   screen_diagnosis_stage <- ifelse(screen_diagnosis_stage == screen_early_state, "early", "late")  
+   screen_diagnosis_stage <- ifelse(screen_diagnosis_stage == screen_early_state, "Early", "Late")  
   }
-#  browser()
+
+  #Get cumulative number of false positives
+  total_FP=NA
+  if(!is.na(screen_diagnosis_time)){
+   total_FP=sum(observed.data$obs.data[observed.data$obs.times<=screen_diagnosis_time]==6)
+  }else{
+    if(!is.na(clinical_diagnosis_time)){
+      total_FP=sum(observed.data$obs.data[observed.data$obs.times<=clinical_diagnosis_time]==6)
+    }else{
+      total_FP=sum(observed.data$obs.data==6)
+    }
+  }
+  
+   
   return(data.frame(ID, screen_diagnosis_time, screen_diagnosis_stage, 
-                    clinical_diagnosis_time, clinical_diagnosis_stage,onset_time))
+                    clinical_diagnosis_time, clinical_diagnosis_stage,onset_time,late_onset_time,total_FP))
 }
 
 

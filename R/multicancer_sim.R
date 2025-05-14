@@ -125,11 +125,11 @@ sim_multiple_cancer_multiple_individuals <- function(num_individuals, cancer_sit
 #' @export
 create_emission_matrix <- function(rate_matrix, early_sensitivity, late_sensitivity, specificity) {
   num_states <- nrow(rate_matrix)
-  emission_matrix <- matrix(0, nrow = num_states, ncol = 5)
+  emission_matrix <- matrix(0, nrow = num_states, ncol = 6)
 
   # Define specific emission probabilities based on early and late sensitivities and specificity
   emission_matrix[1:(num_states - 4), 1] <- specificity
-  emission_matrix[1:(num_states - 4), 5] <- 1 - specificity
+  emission_matrix[1:(num_states - 4), 6] <- 1 - specificity
   emission_matrix[(num_states - 3), 1] <- 1 - early_sensitivity
   emission_matrix[(num_states - 3), 2] <- early_sensitivity
   emission_matrix[(num_states - 2), 3] <- late_sensitivity
