@@ -1,12 +1,36 @@
-
-###########################################################################################
-#sim_individual_MCED
-#Author: 
-#
-# INPUTS: 
-#
-#OUTPUTS: A data frame with the simulated data for the individual.
-#################################################################################################
+#####################################################
+#' Simulate an Individual.
+#'
+#' Simulates cancer onset, screening detection, and death (cancer or other-cause) for a single individual.
+#'
+#' @param ID Numeric ID for the individual.
+#' @param cancer_sites Vector of selected cancer sites.
+#' @param rates_list List of transition rate matrices for each cancer site.
+#' @param test_performance A list with early_sens, late_sens, and specificities for the test.
+#' @param other_cause_death_dist A table representing other-cause mortality.
+#' @param starting_age Starting age for simulation.
+#' @param num_screens Number of screenings.
+#' @param screen_interval Time interval between screenings.
+#' @param end_time Ending time (age) of simulation.
+#' @param sex Character; "Male" or "Female".
+#' @param surv_param_table Survival parameters table (for simulating cancer death).
+#'
+#' @return A data frame with simulation results for the individual, including cancer events, screening detection, and death info.
+#'
+#' @examples
+#' result <- sim_individual_MCED(
+#'   ID = 1,
+#'   cancer_sites = c("Lung", "Colorectal"),
+#'   rates_list = example_rates_list,
+#'   test_performance = example_test_perf,
+#'   other_cause_death_dist = example_death_dist,
+#'   starting_age = 50,
+#'   num_screens = 5,
+#'   screen_interval = 1,
+#'   end_time = 90,
+#'   sex = "Male",
+#'   surv_param_table = example_surv_table
+#' )
 sim_individual_MCED<-function( ID, 
                                cancer_sites,
                                rates_list,
@@ -104,6 +128,7 @@ sim_individual_MCED<-function( ID,
   return(result)
 }
 
+<<<<<<< HEAD
 ###########################################################################################
 #sim_multi_individuals_MCED
 #Author: 
@@ -113,6 +138,56 @@ sim_individual_MCED<-function( ID,
 #OUTPUTS: A data frame with the combined simulated data for multiple individuals.
 ############################################################################################
 sim_multiple_individuals_MCED_parallel_universe <- function(cancer_sites,
+=======
+###########################################################
+#' Simulate Multiple Individuals Under a Parallel Universe MCED Setting
+#'
+#' Simulates multiple individuals with cancer onset, screening detection, and mortality (cancer or other cause).
+#'
+#' @param cancer_sites Vector of cancer sites.
+#' @param LMST_vec Vector of late mean sojourn times.
+#' @param OMST_vec Vector of overall mean sojourn times.
+#' @param test_performance_dataframe Data frame with test sensitivity/specificity info.
+#' @param starting_age Starting age for simulation.
+#' @param ending_age Ending age for simulation.
+#' @param num_screens Number of screening rounds.
+#' @param screen_interval Interval between screening rounds.
+#' @param num_males Number of male individuals to simulate.
+#' @param num_females Number of female individuals to simulate.
+#' @param all_rates_male List of transition matrices for males.
+#' @param all_rates_female List of transition matrices for females.
+#' @param all_meta_data_female Metadata for female cancer sites.
+#' @param all_meta_data_male Metadata for male cancer sites.
+#' @param cdc_data CDC mortality data.
+#' @param hmd_data Human Mortality Database data.
+#' @param MCED_cdc CDC data for MCED.
+#' @param surv_param_table Survival parameters table.
+#'
+#' @return A data frame with combined simulated results for all individuals.
+#'
+#' @examples
+#' sim_data <- sim_multiple_individuals_MCED_parallel_universe(
+#'   cancer_sites = c("Lung", "Colorectal"),
+#'   LMST_vec = c(2, 3),
+#'   OMST_vec = c(5, 6),
+#'   test_performance_dataframe = test_perf_df,
+#'   starting_age = 50,
+#'   ending_age = 90,
+#'   num_screens = 5,
+#'   screen_interval = 1,
+#'   num_males = 100,
+#'   num_females = 100,
+#'   all_rates_male = male_rates,
+#'   all_rates_female = female_rates,
+#'   all_meta_data_female = female_meta,
+#'   all_meta_data_male = male_meta,
+#'   cdc_data = cdc,
+#'   hmd_data = hmd,
+#'   MCED_cdc = mced_cdc,
+#'   surv_param_table = surv_params
+#' )
+sim_multiple_individuals_MCED_parallel_universe <- function(  cancer_sites,
+>>>>>>> refs/remotes/origin/main
                                          LMST_vec, 
                                          OMST_vec, 
                                          test_performance_dataframe, 
