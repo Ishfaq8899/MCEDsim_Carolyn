@@ -1,5 +1,5 @@
 #####################################################
-#' Simulate an Individual.
+#' Simulate an individual with and without MCED screening.
 #'
 #' Simulates cancer onset, screening detection, and death (cancer or other-cause) for a single individual.
 #'
@@ -7,6 +7,7 @@
 #' @param cancer_sites Vector of selected cancer sites.
 #' @param rates_list List of transition rate matrices for each cancer site.
 #' @param test_performance A list with early_sens, late_sens, and specificities for the test.
+#' @param MCED_specificity Overall specificity for the MCED test (not specific to cancer site)
 #' @param other_cause_death_dist A table representing other-cause mortality.
 #' @param starting_age Starting age for simulation.
 #' @param num_screens Number of screenings.
@@ -129,15 +130,6 @@ sim_individual_MCED<-function( ID,
 }
 
 
-###########################################################################################
-#sim_multi_individuals_MCED
-#Author: 
-# Function to simulate multiple individuals 
-# INPUTS: 
-#
-#OUTPUTS: A data frame with the combined simulated data for multiple individuals.
-############################################################################################
-
 ###########################################################
 #' Simulate Multiple Individuals Under a Parallel Universe MCED Setting
 #'
@@ -147,6 +139,7 @@ sim_individual_MCED<-function( ID,
 #' @param LMST_vec Vector of late mean sojourn times.
 #' @param OMST_vec Vector of overall mean sojourn times.
 #' @param test_performance_dataframe Data frame with test sensitivity/specificity info.
+#' @param MCED_specificity Overall specificity for the MCED test (not specific to cancer site)
 #' @param starting_age Starting age for simulation.
 #' @param ending_age Ending age for simulation.
 #' @param num_screens Number of screening rounds.
