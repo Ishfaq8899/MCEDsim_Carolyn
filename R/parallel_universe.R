@@ -128,7 +128,7 @@ sim_individual_MCED<-function( ID,
   return(result)
 }
 
-<<<<<<< HEAD
+
 ###########################################################################################
 #sim_multi_individuals_MCED
 #Author: 
@@ -137,8 +137,7 @@ sim_individual_MCED<-function( ID,
 #
 #OUTPUTS: A data frame with the combined simulated data for multiple individuals.
 ############################################################################################
-sim_multiple_individuals_MCED_parallel_universe <- function(cancer_sites,
-=======
+
 ###########################################################
 #' Simulate Multiple Individuals Under a Parallel Universe MCED Setting
 #'
@@ -186,8 +185,8 @@ sim_multiple_individuals_MCED_parallel_universe <- function(cancer_sites,
 #'   MCED_cdc = mced_cdc,
 #'   surv_param_table = surv_params
 #' )
-sim_multiple_individuals_MCED_parallel_universe <- function(  cancer_sites,
->>>>>>> refs/remotes/origin/main
+#' 
+sim_multiple_individuals_MCED_parallel_universe <- function(cancer_sites,
                                          LMST_vec, 
                                          OMST_vec, 
                                          test_performance_dataframe, 
