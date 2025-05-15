@@ -4,11 +4,13 @@
 \alias{sim_othercause_death}
 \title{Simulate other-cause death time}
 \usage{
-sim_othercause_death(othercause_death_table)
+sim_othercause_death(othercause_death_table, ID = NA)
 }
 \arguments{
 \item{othercause_death_table}{A data frame with survival probabilities for causes other than the selected cancers.
 Includes columns: age, sex, year, other_cause_rate, surv.}
+
+\item{ID}{optional ID to set random seed.}
 }
 \value{
 A numeric value representing the simulated time to death from other causes.

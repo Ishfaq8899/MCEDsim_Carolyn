@@ -25,6 +25,9 @@ sim_cancer_death(
 
 \item{cancer_survival_dist:}{a data frame with columns: surv, time, site, stage, sex, model_type}
 }
+\value{
+A data frame with "time" and "status" elements, where status=1 indicates the event occurred.
+}
 \description{
 Simulate a time of cancer death for a specific cancer
 Simulate a time of cancer death for a specific cancer in a specific stage based on provided survival distributions.

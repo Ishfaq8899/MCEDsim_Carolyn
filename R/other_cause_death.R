@@ -219,13 +219,17 @@ make_othercause_death_table <- function(cdc_data, MCED_cdc, hmd_data, selected_c
  #'
  #' @param othercause_death_table A data frame with survival probabilities for causes other than the selected cancers.
  #'                               Includes columns: age, sex, year, other_cause_rate, surv.
+ #' @param ID optional ID to set random seed.                              
  #'
  #' @return A numeric value representing the simulated time to death from other causes.
  #' @export
  #' @examples
  #' othercause_death_table <- make_othercause_death_table(cdc_data, MCED_cdc, hmd_data, selected_cancers, "Female", 2019, 60)
  #' sim_time <- sim_othercause_death(othercause_death_table)
-sim_othercause_death <- function(othercause_death_table) {
+sim_othercause_death <- function(othercause_death_table,ID=NA) {
+   if(!is.na(ID)){
+     set.seed(ID)
+   }
    the_time=gettime(time = othercause_death_table$age, surv = othercause_death_table$surv)
   
    return(the_time)

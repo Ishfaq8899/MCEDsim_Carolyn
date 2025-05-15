@@ -2,14 +2,15 @@
 % Please edit documentation in R/sim_death.R
 \name{sim_cancer_death_param}
 \alias{sim_cancer_death_param}
-\title{Simulate a time of cancer death for a specific cancer in a specific stage based on provided survival distributions.}
+\title{Simulate a time of cancer death for a specific cancer in a specific stage based on provided parametric survival distributions.}
 \usage{
 sim_cancer_death_param(
   the_stage,
   the_cancer_site,
   the_sex,
   the_model_type,
-  param_table
+  param_table,
+  ID = NA
 )
 }
 \arguments{
@@ -21,11 +22,13 @@ sim_cancer_death_param(
 
 \item{the_model_type}{Weibull or  Loglogistic}
 
-\item{param_table_dist}{a data frame with columns: intercept (based on survreg fit), scale (based on survreg fit) site, stage, sex, model_type}
+\item{param_table}{a data frame with columns: intercept (based on survreg fit), scale (based on survreg fit) site, stage, sex, model_type}
+
+\item{ID}{optional ID to set seed}
 }
 \value{
 A data frame with "time" and "status" elements, where status=1 indicates the event occurred.
 }
 \description{
-Simulate a time of cancer death for a specific cancer in a specific stage based on provided survival distributions.
+Simulate a time of cancer death for a specific cancer in a specific stage based on provided parametric survival distributions.
 }

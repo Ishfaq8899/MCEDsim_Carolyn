@@ -229,7 +229,7 @@ get.obs.data.individual <- function(ID, rate.matrix, emission.matrix,
                                    ctmc.states = trajectory$states,
                                    obs.times = obs.times)
 
-  # Generate observed data using HMM
+   # Generate observed data using HMM
   observed.data <- observed.data.hmm(obs.times = discrete.states$obs.times,
                                      underlying.states = discrete.states$states,
                                      emission.matrix = emission.matrix)
@@ -263,21 +263,15 @@ get.obs.data.individual <- function(ID, rate.matrix, emission.matrix,
    screen_diagnosis_stage <- ifelse(screen_diagnosis_stage == screen_early_state, "Early", "Late")  
   }
 
-  #Get cumulative number of false positives
-  total_FP=NA
-  if(!is.na(screen_diagnosis_time)){
-   total_FP=sum(observed.data$obs.data[observed.data$obs.times<=screen_diagnosis_time]==6)
-  }else{
-    if(!is.na(clinical_diagnosis_time)){
-      total_FP=sum(observed.data$obs.data[observed.data$obs.times<=clinical_diagnosis_time]==6)
-    }else{
-      total_FP=sum(observed.data$obs.data==6)
-    }
-  }
+  #Get cumulative number screens without cancer present
+  total_no_canc_screens=sum(discrete.states$states<pre_clin_early_state)
+ 
+  
+
   
    
   return(data.frame(ID, screen_diagnosis_time, screen_diagnosis_stage, 
-                    clinical_diagnosis_time, clinical_diagnosis_stage,onset_time,late_onset_time,total_FP))
+                    clinical_diagnosis_time, clinical_diagnosis_stage,onset_time,late_onset_time,total_no_canc_screens))
 }
 
 
