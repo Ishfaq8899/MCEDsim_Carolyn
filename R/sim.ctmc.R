@@ -13,7 +13,7 @@
 #' @param rate.matrix      Rate matrix for the CTMC.
 #' @param start.time       Time to start simulation (default is 0).
 #' @param end.time         Time to stop simulations.
-#' @param absorbing.state  Absorbing state (default is 0).
+#' @param absorbing.states  Absorbing state .
 #'
 #' @return A list of two objects: "times" containing transition times and "states" containing transition states.
 #'
@@ -23,7 +23,7 @@
 #' sim_results <- sim.ctmc(start.state = 1, rate.matrix = rate_matrix, end.time = 10)
 #'
 #' @export
-sim.ctmc <- function(start.state, rate.matrix, end.time, start.time = 0, absorbing.state = 0){
+sim.ctmc <- function(start.state, rate.matrix, end.time, start.time = 0, absorbing.states = 0){
 
  state.space <- seq(1:dim(rate.matrix)[1])
  size <- dim(rate.matrix)[1]
@@ -37,7 +37,7 @@ sim.ctmc <- function(start.state, rate.matrix, end.time, start.time = 0, absorbi
 
    k <- 2
 
-  while ((cur.time < end.time) & (cur.state != absorbing.state)) {
+  while ((cur.time < end.time) & !(cur.state %in% c(absorbing.states))) {
    exp.rate <- (-1) * rate.matrix[cur.state, cur.state]
    if (exp.rate == 0) {
         cur.time <- end.time
@@ -211,13 +211,14 @@ get.obs.data.individual <- function(ID, rate.matrix, emission.matrix,
   set.seed(ID)
   # Simulate CTMC trajectory for individual
   trajectory <- sim.ctmc(rate.matrix = rate.matrix, start.state = start.state, 
-                         end.time = end.time, start.time = start.time)
+                         end.time = end.time, start.time = start.time,absorbing.states=c(n_states-1,n_states))
   
   onset_time=NA
   late_onset_time=NA
 
   if(pre_clin_early_state%in%trajectory$states){
     onset_time=min(trajectory$times[trajectory$states==pre_clin_early_state])
+   # browser()
   }
 
   if(pre_clin_late_state%in%trajectory$states){
@@ -255,8 +256,7 @@ get.obs.data.individual <- function(ID, rate.matrix, emission.matrix,
   #Get screen diagnosis time
   if (screen_early_state %in% c(observed.data$obs.data) || screen_late_state %in% c(observed.data$obs.data)) {
 
-    # Need to fix this so it works with false positives. Currently does not work!
-    screen_diagnosis_index <- min(which(observed.data$obs.data %in% c(screen_early_state, screen_late_state) == T))
+      screen_diagnosis_index <- min(which(observed.data$obs.data %in% c(screen_early_state, screen_late_state) == T))
     screen_diagnosis_time <- observed.data$obs.times[screen_diagnosis_index]
     screen_diagnosis_stage <- observed.data$obs.data[screen_diagnosis_index]
     

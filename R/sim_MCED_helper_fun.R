@@ -17,9 +17,14 @@ get_filtered_rates <- function(the_omsts, the_lmsts, all_meta_data, all_rates, t
   ###########################
   #rates_list <- lapply(all_fits[unlist(the_indices)], "[[", "rate.matrix")
   #Extract the rate matrices corresponding to the specified OMSTs and LMSTs 
-  #browser()
+
+  if(length(the_indices)>1){
   rates_list <- purrr::array_branch(all_rates[,,unlist(the_indices)],3)
-  
+  }else{
+    rates_list <- list(all_rates[,,unlist(the_indices)])
+    
+  }
+
   ###########################
   
   cancer_sites <- all_meta_data %>%

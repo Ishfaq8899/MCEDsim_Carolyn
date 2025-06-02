@@ -17,7 +17,7 @@
 #' @param surv_param_table Survival parameters table (for simulating cancer death).
 #'
 #' @return A data frame with simulation results for the individual, including cancer events, screening detection, and death info.
-#'
+#' 
 #' @examples
 #' result <- sim_individual_MCED(
 #'   ID = 1,
@@ -200,7 +200,7 @@ sim_multiple_individuals_MCED_parallel_universe <- function(cancer_sites,
                                          surv_param_table)
 {
   
-  
+ # browser()
   # Creat a vector of IDs
   IDs_male <- 1:num_males
   IDs_female <-(num_males+1):(num_females+num_males)
@@ -233,7 +233,7 @@ sim_multiple_individuals_MCED_parallel_universe <- function(cancer_sites,
                                                      the_starting_age = starting_age,
                                                      the_sex="Male",
                                                      selected_cancers=sites_male,
-                                                     the_year=2022)
+                                                     the_year=2018)
   
   other_cause_death_female=make_othercause_death_table(cdc_data=cdc_data,
                                                        MCED_cdc=MCED_cdc, 
@@ -241,7 +241,7 @@ sim_multiple_individuals_MCED_parallel_universe <- function(cancer_sites,
                                                        the_starting_age = starting_age,
                                                        the_sex="Female",
                                                    selected_cancers=sites_female,
-                                                   the_year=2022)
+                                                   the_year=2018)
 
   # Use mapply to apply the sim_individual_UKCTOCS function to each ID
   results_list_male <- mapply(sim_individual_MCED,
