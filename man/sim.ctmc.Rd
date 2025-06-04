@@ -9,7 +9,7 @@ sim.ctmc(
   rate.matrix,
   end.time,
   start.time = 0,
-  absorbing.state = 0
+  absorbing.states = 0
 )
 }
 \arguments{
@@ -21,7 +21,7 @@ sim.ctmc(
 
 \item{start.time}{Time to start simulation (default is 0).}
 
-\item{absorbing.state}{Absorbing state (default is 0).}
+\item{absorbing.states}{Absorbing state .}
 }
 \value{
 A list of two objects: "times" containing transition times and "states" containing transition states.

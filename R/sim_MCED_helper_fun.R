@@ -13,12 +13,12 @@ get_filtered_rates <- function(the_omsts, the_lmsts, all_meta_data, all_rates, t
   the_indices <- all_meta_data %>%
     filter(OMST %in% the_omsts, LMST %in% the_lmsts, cancer_site %in% the_cancer_sites) %>%
     select("index")
-  
+
   ###########################
   #rates_list <- lapply(all_fits[unlist(the_indices)], "[[", "rate.matrix")
   #Extract the rate matrices corresponding to the specified OMSTs and LMSTs 
 
-  if(length(the_indices)>1){
+  if(length(the_indices$index)>1){
   rates_list <- purrr::array_branch(all_rates[,,unlist(the_indices)],3)
   }else{
     rates_list <- list(all_rates[,,unlist(the_indices)])
@@ -39,13 +39,11 @@ get_filtered_rates <- function(the_omsts, the_lmsts, all_meta_data, all_rates, t
 #' @param rate.matrix the rate matrix used to simulate cancer natural history
 #' @param a1 starting age at first screen 
 #' @return the initial state
-#' @export
 get_init <- function(rate.matrix, a1) {
   k <- dim(rate.matrix)[1]
   init <- numeric(k)
   init[k] <- 0
   init[k - 1] <- 0
-  
   prob_mat_a1 <- MatrixExp(t = a1, mat = rate.matrix)
   denom <- 1 - prob_mat_a1[1, k - 1] - prob_mat_a1[1, k]
   

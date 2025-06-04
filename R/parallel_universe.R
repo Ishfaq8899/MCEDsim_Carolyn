@@ -51,7 +51,7 @@ sim_individual_MCED<-function( ID,
   
   
   # Get the starting states for each cancer
-  start_states= sapply(rates_list, FUN="get_init",a1=starting_age)
+  start_states= unlist(lapply(rates_list, FUN="get_init",a1=starting_age))
 
   ### get the screening times
   screen_times = seq((starting_age),(num_screens + starting_age-1), by=screen_interval)
@@ -220,7 +220,7 @@ sim_multiple_individuals_MCED_parallel_universe <- function(cancer_sites,
                                      all_rates = all_rates_female, the_cancer_site = cancer_sites)
   sites_female = rates_list_female$cancer_sites 
   rates_list_female = rates_list_female$rates_list                                    
-  
+ 
   # Extract sensitivities and specificity based on selected cancer sites
   test_performance_male = test_performance_dataframe %>% filter(cancer_site %in% as.vector(sites_male))
   test_performance_female = test_performance_dataframe %>% filter(cancer_site %in% as.vector(sites_female))
@@ -286,7 +286,7 @@ sim_multiple_individuals_MCED_parallel_universe <- function(cancer_sites,
     #Ascertain age at at screen and clinical diagnosis in presence of other cause death
     #Ascertain age at death under screening scenarios and no screening scenarios in presence of other cause death
     #Ascertain age at diagnosis under screening scenario (can be either screen or clinical)
-    #Ascertain mode of diagnosis under screenng scenario
+    #Ascertain mode of diagnosis under screening scenario
     #Ascertain stage at diagnsosis under screening scenario
     #Ascertain if individual was overdiagnosed (screen detected but died due to other causes prior to clinical diagnosis)
     combined_results=combined_results %>% mutate(clin_dx_age = pmin(other_cause_death_time,clinical_diagnosis_time,end_time,na.rm = T),
@@ -298,7 +298,7 @@ sim_multiple_individuals_MCED_parallel_universe <- function(cancer_sites,
                                ),
                                clin_dx_event_stage = case_when(clin_dx_event == "clin_cancer_diagnosis" & clinical_diagnosis_stage == "Early"~1,
                                                                clin_dx_event == "clin_cancer_diagnosis" & clinical_diagnosis_stage == "Late"~2,
-                                                               .default = 0),
+                                                               .default = 3),
                                screen_dx_age = pmin(other_cause_death_time,screen_diagnosis_time,end_time,na.rm = T),
                                screen_dx_event = case_when(
                                  screen_dx_age == other_cause_death_time ~ "other_cause_death",
@@ -308,7 +308,7 @@ sim_multiple_individuals_MCED_parallel_universe <- function(cancer_sites,
                                ),
                                screen_dx_event_stage = case_when(screen_dx_event == "screen_cancer_diagnosis" & screen_diagnosis_stage == "Early"~1,
                                                                  screen_dx_event == "screen_cancer_diagnosis" & screen_diagnosis_stage == "Late"~2,
-                                                                 .default = 0),
+                                                                 .default = 3),
                                death_age_no_screen=pmin(other_cause_death_time,cancer_death_time_no_screen,end_time,na.rm = T),
                                death_age_screen=pmin(other_cause_death_time,cancer_death_time_screen,end_time,na.rm = T),
                                death_event_no_screen=case_when(
@@ -330,7 +330,7 @@ sim_multiple_individuals_MCED_parallel_universe <- function(cancer_sites,
                                                                                screen_dx_event == "screen_cancer_diagnosis" & screen_diagnosis_stage == "Late" ~2,
                                                                                (screen_dx_event!="screen_cancer_diagnosis" & clin_dx_event=="clin_cancer_diagnosis") & clinical_diagnosis_stage=="Early"~1,
                                                                                (screen_dx_event !="screen_cancer_diagnosis" & clin_dx_event=="clin_cancer_diagnosis") & clinical_diagnosis_stage=="Late"~2,
-                                                                               .default = 0),
+                                                                               .default = 3),
                                life_years_diff=death_age_screen-death_age_no_screen,
                                overdiagnosis=ifelse(screen_dx_event=="screen_cancer_diagnosis"&clin_dx_event=="other_cause_death",1,0)
                                
