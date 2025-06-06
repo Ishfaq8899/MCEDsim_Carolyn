@@ -8,9 +8,9 @@ sim_cancer_death_param(
   the_stage,
   the_cancer_site,
   the_sex,
+  ID = NA,
   the_model_type,
-  param_table,
-  ID = NA
+  param_table
 )
 }
 \arguments{
@@ -20,11 +20,11 @@ sim_cancer_death_param(
 
 \item{the_sex}{Male or Female}
 
+\item{ID}{optional ID to set seed}
+
 \item{the_model_type}{Weibull or  Loglogistic}
 
 \item{param_table}{a data frame with columns: intercept (based on survreg fit), scale (based on survreg fit) site, stage, sex, model_type}
-
-\item{ID}{optional ID to set seed}
 }
 \value{
 A data frame with "time" and "status" elements, where status=1 indicates the event occurred.

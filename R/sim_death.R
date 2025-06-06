@@ -53,10 +53,10 @@ sim_cancer_death <- function(the_stage, the_cancer_site, the_sex,the_model_type,
 #' @param ID optional ID to set seed
 #' @return A data frame with "time" and "status" elements, where status=1 indicates the event occurred. 
 #' @export
-sim_cancer_death_param <- function(the_stage, the_cancer_site, the_sex,the_model_type, param_table,ID=NA){
+sim_cancer_death_param <- function(the_stage, the_cancer_site, the_sex,ID=NA,the_model_type, param_table){
   
-  if(!is.na(ID)){
-    set.seed(ID)
+ if(!is.na(ID)){
+   set.seed(ID*2000)
   }
   # Filter the survival distribution based on the type and stage
   survival_dist_indiv = filter(param_table,cancer_site == paste(the_cancer_site), stage==paste(the_stage),

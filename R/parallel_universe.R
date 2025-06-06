@@ -76,7 +76,7 @@ sim_individual_MCED<-function( ID,
   # Add other-cause death info
   result$other_cause_death_status <- other_cause_death$status
   result$other_cause_death_time <- other_cause_death$time
-  
+  result$sex=sex
   #-----------------------  
   # Identify first cancer by onset time
   #-----------------------
@@ -106,14 +106,60 @@ sim_individual_MCED<-function( ID,
                                                                                                        the_sex=sex,
                                                                                                        the_model_type="Loglogistic",
                                                                                                        param_table=surv_param_table,ID=ID))%>%
-                  
-        mutate(cancer_death_time_screen=ifelse(screen_diagnosis_stage==clinical_diagnosis_stage|is.na(screen_diagnosis_stage),cancer_death_time_no_screen,
-                                                           clinical_diagnosis_time+sim_cancer_death_param(the_stage=screen_diagnosis_stage,
-                                                                                                          the_cancer_site=cancer_site,
-                                                                                                          the_sex=sex,
-                                                                                                          the_model_type="Loglogistic",
-                                                                                                          param_table=surv_param_table,
-                                                                                                          ID=ID)))
+                                    mutate(cancer_death_time_screen=ifelse((screen_diagnosis_stage!=clinical_diagnosis_stage&!is.na(screen_diagnosis_stage))&!
+                                                                             is.na(clinical_diagnosis_stage),
+                                                                           clinical_diagnosis_time+
+                                                                             sim_cancer_death_param(the_stage="Early",
+                                                                                                    the_cancer_site=cancer_site,
+                                                                                                    the_sex=sex,
+                                                                                                    the_model_type="Loglogistic",
+                                                                                                    param_table=surv_param_table,
+                                                                                                    ID=ID),
+                                                                           cancer_death_time_no_screen))
+     
+      
+                 
+    # cancer_death_time_screen=NA  
+    # if(!(first_cancer_row$screen_diagnosis_stage==first_cancer_row$clinical_diagnosis_stage|is.na(first_cancer_row$screen_diagnosis_stage))&!
+    #    is.na(first_cancer_row$clinical_diagnosis_stage)){
+    #   print("Early")
+    #   # first_cancer_row$cancer_death_time_screen=first_cancer_row$clinical_diagnosis_time+
+      #                         sim_cancer_death_param(the_stage="Early",
+      #                         the_cancer_site=first_cancer_row$cancer_site,
+      #                         the_sex=first_cancer_row$sex,
+      #                         the_model_type="Loglogistic",
+      #                         param_table=surv_param_table,
+      #                         ID=ID)
+      # 
+      
+   
+      # Filter the survival distribution based on the type and stage
+    # browser()
+    #   set.seed(first_cancer_row$ID)
+    #   survival_dist_indiv = filter(surv_param_table,cancer_site == paste(first_cancer_row$cancer_site), stage=="Early",
+    #                                sex==first_cancer_row$sex,model_type=="Loglogistic")
+    #   
+    #     the_survobj=s_loglogistic(intercept = survival_dist_indiv$intercept, scale =survival_dist_indiv$scale)
+    #   
+    #   
+    #    #    plot(ecdf(rsurv(the_survobj,n=10000)),xlim=c(0,20))
+    #   death_time=rsurv(the_survobj,n=1)
+    # #  browser()
+    # first_cancer_row$cancer_death_time_screen=first_cancer_row$clinical_diagnosis_time+death_time
+    # 
+    
+    # first_cancer_row$cancer_death_time_screen=first_cancer_row$clinical_diagnosis_time+
+    #   sim_cancer_death_param(the_stage="Early",
+    #                          the_cancer_site=first_cancer_row$cancer_site,
+    #                          the_sex=first_cancer_row$sex,
+    #                          the_model_type="Loglogistic",
+    #                          param_table=surv_param_table,
+    #                          ID=ID)
+    # 
+    # }else{
+    #   first_cancer_row$cancer_death_time_screen=first_cancer_row$cancer_death_time_no_screen
+    # }
+    # 
     
     }
     result<-first_cancer_row
@@ -273,14 +319,28 @@ sim_multiple_individuals_MCED_parallel_universe <- function(cancer_sites,
                                                 MCED_specificity=MCED_specificity),
                                 SIMPLIFY = FALSE)
   
+  
+  
+  
+  
+  
   # Combine all individual results into one data frame
   combined_results_males <- do.call(rbind, results_list_male)%>%mutate(sex="Male")
   combined_results_females <- do.call(rbind, results_list_female)%>%mutate(sex="Female")
 
-
     combined_results=bind_rows(combined_results_males,combined_results_females)%>%
                    mutate(start_age=starting_age,end_time=ending_age)
   
+  
+  #Simulate times of cancer_death_time screen for individuals diagnosed early via screening but late via clinical diagnosis
+   # temp=filter(combined_results,(screen_diagnosis_stage!=clinical_diagnosis_stage&!is.na(screen_diagnosis_stage))&!is.na(clinical_diagnosis_stage))
+   # temp$cancer_death_time_screen=temp$clinical_diagnosis_time+mapply(temp$screen_diagnosis_stage,temp$cancer_site,temp$sex,temp$ID*8,FUN="sim_cancer_death_param",
+   #             MoreArgs=list(the_model_type="Loglogistic",
+   #                           param_table=surv_param_table))
+   # 
+  # combined_results=bind_rows(temp,subset(combined_results,!ID%in%temp$ID))
+
+    
     #Process data with other cause death as a censoring event
     
     #Ascertain age at at screen and clinical diagnosis in presence of other cause death
