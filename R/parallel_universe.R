@@ -15,6 +15,7 @@
 #' @param end_time Ending time (age) of simulation.
 #' @param sex Character; "Male" or "Female".
 #' @param surv_param_table Survival parameters table (for simulating cancer death).
+#' @export
 #'
 #' @return A data frame with simulation results for the individual, including cancer events, screening detection, and death info.
 #' 
@@ -119,48 +120,7 @@ sim_individual_MCED<-function( ID,
      
       
                  
-    # cancer_death_time_screen=NA  
-    # if(!(first_cancer_row$screen_diagnosis_stage==first_cancer_row$clinical_diagnosis_stage|is.na(first_cancer_row$screen_diagnosis_stage))&!
-    #    is.na(first_cancer_row$clinical_diagnosis_stage)){
-    #   print("Early")
-    #   # first_cancer_row$cancer_death_time_screen=first_cancer_row$clinical_diagnosis_time+
-      #                         sim_cancer_death_param(the_stage="Early",
-      #                         the_cancer_site=first_cancer_row$cancer_site,
-      #                         the_sex=first_cancer_row$sex,
-      #                         the_model_type="Loglogistic",
-      #                         param_table=surv_param_table,
-      #                         ID=ID)
-      # 
       
-   
-      # Filter the survival distribution based on the type and stage
-    # browser()
-    #   set.seed(first_cancer_row$ID)
-    #   survival_dist_indiv = filter(surv_param_table,cancer_site == paste(first_cancer_row$cancer_site), stage=="Early",
-    #                                sex==first_cancer_row$sex,model_type=="Loglogistic")
-    #   
-    #     the_survobj=s_loglogistic(intercept = survival_dist_indiv$intercept, scale =survival_dist_indiv$scale)
-    #   
-    #   
-    #    #    plot(ecdf(rsurv(the_survobj,n=10000)),xlim=c(0,20))
-    #   death_time=rsurv(the_survobj,n=1)
-    # #  browser()
-    # first_cancer_row$cancer_death_time_screen=first_cancer_row$clinical_diagnosis_time+death_time
-    # 
-    
-    # first_cancer_row$cancer_death_time_screen=first_cancer_row$clinical_diagnosis_time+
-    #   sim_cancer_death_param(the_stage="Early",
-    #                          the_cancer_site=first_cancer_row$cancer_site,
-    #                          the_sex=first_cancer_row$sex,
-    #                          the_model_type="Loglogistic",
-    #                          param_table=surv_param_table,
-    #                          ID=ID)
-    # 
-    # }else{
-    #   first_cancer_row$cancer_death_time_screen=first_cancer_row$cancer_death_time_no_screen
-    # }
-    # 
-    
     }
     result<-first_cancer_row
  
@@ -200,7 +160,7 @@ sim_individual_MCED<-function( ID,
 #' @param hmd_data Human Mortality Database data.
 #' @param MCED_cdc CDC data for MCED.
 #' @param surv_param_table Survival parameters table.
-#'
+#' @export
 #' @return A data frame with combined simulated results for all individuals.
 #'
 #' @examples
