@@ -161,6 +161,7 @@ sim_individual_MCED<-function( ID,
 #' @param MCED_cdc CDC data for MCED.
 #' @param surv_param_table Survival parameters table.
 #' @export
+#'
 #' @return A data frame with combined simulated results for all individuals.
 #'
 #' @examples
