@@ -137,9 +137,12 @@ sim_individual_MCED<-function( ID,
 
 
 ###########################################################
-#' Simulate Multiple Individuals Under a Parallel Universe MCED Setting
+#' Simulate Multiple Individuals with and without MCED screening
 #'
-#' Simulates multiple individuals with cancer onset, screening detection, and mortality (cancer or other cause).
+#' This function uses a parallel universes approach to simulate the effects of MCED screening. It starts by generating a basic natural history for each cancer site for each individual.
+#' These natural histories 
+#' 
+#' starts with the generation of a basic life history for each simulated woman in the absence of any screening or adjuvant treatment. The effects of each screening and adjuvant treatment strategy under study are then simulated starting using the same basic life history. In this manner, the outputs for the different screening and adjuvant treatment strategies are matched pairs (tuples).Simulates multiple individuals with cancer onset, screening detection, and mortality (cancer or other cause).
 #'
 #' @param cancer_sites Vector of cancer sites.
 #' @param LMST_vec Vector of late mean sojourn times.
