@@ -1,8 +1,7 @@
 # Load necessary libraries
-library(readxl)
-library(dplyr)
-library(tidyr)
-library(devtools)
+#library(dplyr)
+#library(tidyr)
+#library(devtools)
 
 #' Filter MCED cancer data for selected cancer types
 #'
