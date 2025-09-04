@@ -2,7 +2,7 @@
 % Please edit documentation in R/parallel_universe.R
 \name{sim_multiple_individuals_MCED_parallel_universe}
 \alias{sim_multiple_individuals_MCED_parallel_universe}
-\title{Simulate Multiple Individuals Under a Parallel Universe MCED Setting}
+\title{Simulate multiple individuals with and without Multicancer Early Detection (MCED) screening}
 \usage{
 sim_multiple_individuals_MCED_parallel_universe(
   cancer_sites,
@@ -27,11 +27,12 @@ sim_multiple_individuals_MCED_parallel_universe(
 )
 }
 \arguments{
-\item{cancer_sites}{Vector of cancer sites.}
+\item{cancer_sites}{Vector of cancer sites (allowable values include "Anus",  ” Bladder" ,  ”Breast",  ”Colorectal" , "Esophagus"  , ”Gastric", "Headandneck", 
+"Liver" ,  "Lung",   "Pancreas", "Prostate", "Renal", "Uterine","Ovary")}
 
-\item{LMST_vec}{Vector of late mean sojourn times.}
+\item{LMST_vec}{Vector of late mean sojourn times for each cancer site.}
 
-\item{OMST_vec}{Vector of overall mean sojourn times.}
+\item{OMST_vec}{Vector of overall mean sojourn times for each cancer site.}
 
 \item{test_performance_dataframe}{Data frame with test sensitivity/specificity info.}
 
@@ -67,9 +68,26 @@ sim_multiple_individuals_MCED_parallel_universe(
 }
 \value{
 A data frame with combined simulated results for all individuals.
+The function returns each individual's first cancer site,  age and stage of clinical diagnosis in 
+absence of screening, age and stage at screen diagnosis, the time of other-cause mortality, and the time of cancer-specific mortality in absence
+and presence of screening.   Cancer diagnosis and death times are presented both with and without competing other-cause mortality.
 }
 \description{
-Simulates multiple individuals with cancer onset, screening detection, and mortality (cancer or other cause).
+This function simulates cancer outcomes in a population with a designated starting age using a "parallel universe" approach.
+That is, cancer outcomes in the population are simulated with and without MCED screening.  The natural history (i.e., the times of cancer onset and clinical diagnosis) for 
+each individual is the same in both screening and no-screening scenarios.  
+The user specifies cancer sites in the MCED screening test.  The user also provides sensitivity of the tests for early and late-stage disease, where early refers to AJCC 7 stages I-II and late, III-IV, except for
+pancreas cancer, where early is stage I and late, II-IV. 
+Natural history models are based on built-in fitted models that are calibrated to SEER 2015-2021 data by age and sex and can be specified based on 
+user-provided inputs about the overall mean sojourn time (OMST) and the late mean sojourn time (LMST) for each cancer site. 
+The function tracks only the first cancer diagnosis based on pre-clinical onset.
+}
+\details{
+Other-cause mortality is based on all cause mortality tables from the Human Mortality Database that have been adjusted to remove the mortality due to
+cancers included in the MCED tests.  Cancer-specific mortality in the screen arm assumes a stage-shift benefit of screening. That is, individuals
+who are diagnosed in early stage under screening but who would have been diagnosed in late stage clinically, are assume to remain in early stage post lead-time. 
+For both screened and unscreened individuals, cancer mortality is projected from the point of clinical diagnosis (i.e., post lead-time) to prevent
+lead-time bias.
 }
 \examples{
 sim_data <- sim_multiple_individuals_MCED_parallel_universe(

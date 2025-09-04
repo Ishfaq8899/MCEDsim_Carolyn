@@ -137,16 +137,27 @@ sim_individual_MCED<-function( ID,
 
 
 ###########################################################
-#' Simulate Multiple Individuals with and without MCED screening
+#' Simulate multiple individuals with and without Multicancer Early Detection (MCED) screening
 #'
-#' This function uses a parallel universes approach to simulate the effects of MCED screening. It starts by generating a basic natural history for each cancer site for each individual.
-#' These natural histories 
+#' This function simulates cancer outcomes in a population with a designated starting age using a "parallel universe" approach.
+#' That is, cancer outcomes in the population are simulated with and without MCED screening.  The natural history (i.e., the times of cancer onset and clinical diagnosis) for 
+#' each individual is the same in both screening and no-screening scenarios.  
+#' The user specifies cancer sites in the MCED screening test.  The user also provides sensitivity of the tests for early and late-stage disease, where early refers to AJCC 7 stages I-II and late, III-IV, except for
+#' pancreas cancer, where early is stage I and late, II-IV. 
+#' Natural history models are based on built-in fitted models that are calibrated to SEER 2015-2021 data by age and sex and can be specified based on 
+#' user-provided inputs about the overall mean sojourn time (OMST) and the late mean sojourn time (LMST) for each cancer site. 
+#' The function tracks only the first cancer diagnosis based on pre-clinical onset. 
 #' 
-#' starts with the generation of a basic life history for each simulated woman in the absence of any screening or adjuvant treatment. The effects of each screening and adjuvant treatment strategy under study are then simulated starting using the same basic life history. In this manner, the outputs for the different screening and adjuvant treatment strategies are matched pairs (tuples).Simulates multiple individuals with cancer onset, screening detection, and mortality (cancer or other cause).
-#'
-#' @param cancer_sites Vector of cancer sites.
-#' @param LMST_vec Vector of late mean sojourn times.
-#' @param OMST_vec Vector of overall mean sojourn times.
+#' Other-cause mortality is based on all cause mortality tables from the Human Mortality Database that have been adjusted to remove the mortality due to
+#' cancers included in the MCED tests.  Cancer-specific mortality in the screen arm assumes a stage-shift benefit of screening. That is, individuals
+#' who are diagnosed in early stage under screening but who would have been diagnosed in late stage clinically, are assume to remain in early stage post lead-time. 
+#' For both screened and unscreened individuals, cancer mortality is projected from the point of clinical diagnosis (i.e., post lead-time) to prevent
+#' lead-time bias.
+#'  
+#' @param cancer_sites Vector of cancer sites (allowable values include "Anus",  ” Bladder" ,  ”Breast",  ”Colorectal" , "Esophagus"  , ”Gastric", "Headandneck", 
+#' "Liver" ,  "Lung",   "Pancreas", "Prostate", "Renal", "Uterine","Ovary")
+#' @param LMST_vec Vector of late mean sojourn times for each cancer site.
+#' @param OMST_vec Vector of overall mean sojourn times for each cancer site.
 #' @param test_performance_dataframe Data frame with test sensitivity/specificity info.
 #' @param MCED_specificity Overall specificity for the MCED test (not specific to cancer site)
 #' @param starting_age Starting age for simulation.
@@ -166,7 +177,10 @@ sim_individual_MCED<-function( ID,
 #' @export
 #'
 #' @return A data frame with combined simulated results for all individuals.
-#'
+#' The function returns each individual's first cancer site,  age and stage of clinical diagnosis in 
+#' absence of screening, age and stage at screen diagnosis, the time of other-cause mortality, and the time of cancer-specific mortality in absence
+#' and presence of screening.   Cancer diagnosis and death times are presented both with and without competing other-cause mortality.
+
 #' @examples
 #' sim_data <- sim_multiple_individuals_MCED_parallel_universe(
 #'   cancer_sites = c("Lung", "Colorectal"),

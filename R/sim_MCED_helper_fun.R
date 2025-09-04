@@ -8,7 +8,8 @@
 #'           1) A list of rate matrices that correspond to the selected OMST and LMST specifications for each the selected cancer sites. 
 #'           2) vector of the cancer sites  
 #' @export
-#' @import purrr 
+#' @import purrr
+#' @import dplyr 
 get_filtered_rates <- function(the_omsts, the_lmsts, all_meta_data, all_rates, the_cancer_sites) {
   the_indices <- all_meta_data %>%
     filter(OMST %in% the_omsts, LMST %in% the_lmsts, cancer_site %in% the_cancer_sites) %>%
