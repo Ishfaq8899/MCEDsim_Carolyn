@@ -77,6 +77,7 @@ filter_multiple_cancers <- function(data, cancer_sites) {
 #' @return A data frame with age-specific and sex-specific mortality rates due to causes
 #'         other than the selected cancers. Includes columns: age, sex, year, other_cause_rate.
 #' @export
+#' @import tidyr
 #' @examples
 #' cdc_data <- read.csv("all_cause_cdc.csv")
 #' MCED_cdc <- read.csv("MCED_cdc.csv")

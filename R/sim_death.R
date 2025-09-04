@@ -53,6 +53,7 @@ sim_cancer_death <- function(the_stage, the_cancer_site, the_sex,the_model_type,
 #' @param ID optional ID to set seed
 #' @return A data frame with "time" and "status" elements, where status=1 indicates the event occurred. 
 #' @export
+#' @import survobj
 sim_cancer_death_param <- function(the_stage, the_cancer_site, the_sex,ID=NA,the_model_type, param_table){
   
  if(!is.na(ID)){

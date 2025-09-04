@@ -40,6 +40,7 @@ get_filtered_rates <- function(the_omsts, the_lmsts, all_meta_data, all_rates, t
 #' @param rate.matrix the rate matrix used to simulate cancer natural history
 #' @param a1 starting age at first screen 
 #' @return the initial state
+#' @import msm
 #' @export
 get_init <- function(rate.matrix, a1) {
   k <- dim(rate.matrix)[1]

@@ -90,25 +90,48 @@ For both screened and unscreened individuals, cancer mortality is projected from
 lead-time bias.
 }
 \examples{
-sim_data <- sim_multiple_individuals_MCED_parallel_universe(
-  cancer_sites = c("Lung", "Colorectal"),
-  LMST_vec = c(2, 3),
-  OMST_vec = c(5, 6),
-  test_performance_dataframe = test_perf_df,
-  starting_age = 50,
-  ending_age = 90,
-  num_screens = 5,
-  screen_interval = 1,
-  num_males = 100,
-  num_females = 100,
-  all_rates_male = male_rates,
-  all_rates_female = female_rates,
-  all_meta_data_female = female_meta,
-  all_meta_data_male = male_meta,
-  cdc_data = cdc,
-  hmd_data = hmd,
-  MCED_cdc = mced_cdc,
-  surv_param_table = surv_params
-)
+library(MCEDsim)
+#Load the other-cause mortality tables
+data("cdc_hmd_data")
+#Load the prefitted natural history models
+data("combined_fits")
+#Load the prefitted cause-specific survival models
+data("parametric_surv_fits")
 
+#Specify inputs
+#Cancer sites in the MCED test
+cancer_sites_vec=c("Anus",  "Bladder",  "Breast", "Esophagus",
+                  "Gastric", "Headandneck","Liver" , 
+                  "Lung",   "Pancreas", "Prostate", "Renal",  "Uterine","Ovary")
+
+#overall mean sojourn time=2 years for all sites
+OMST_vec=rep(2,times=13)
+#late mean sojourn time=.5 years for all sites
+LMST_vec=rep(.5,times=13)
+#early-stage sensitivity
+early_sens=rep(.65,times=13)
+#late-stage sensitivity
+late_sens=rep(.95,times=13)
+#dataframe with all of the test performance inputs
+test_performance_dataframe = data.frame(early_sens, late_sens,cancer_site = cancer_sites_vec)
+
+results <- sim_multiple_individuals_MCED_parallel_universe(cancer_sites = cancer_sites_vec,
+                                                          LMST_vec = LMST_vec,
+                                                          OMST_vec = OMST_vec,
+                                                          test_performance_dataframe = test_performance_dataframe,
+                                                          starting_age = 45,
+                                                          ending_age=500,
+                                                          num_screens = 30,
+                                                          screen_interval = 1,
+                                                          num_males = 20,
+                                                          num_females = 20,
+                                                          all_rates_male = all_rates_male,
+                                                          all_rates_female = all_rates_female,
+                                                          all_meta_data_female = all_meta_data_female,
+                                                          all_meta_data_male = all_meta_data_male,
+                                                          cdc_data = all_cause_cdc,
+                                                          hmd_data = hmd_data,
+                                                          MCED_cdc = MCED_cdc,
+                                                          surv_param_table=param_table,
+                                                          MCED_specificity = .995)
 }
