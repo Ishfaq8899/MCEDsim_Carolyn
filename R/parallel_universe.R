@@ -2,7 +2,7 @@
 #' Simulate a single individual with and without Multicancer Early Detection (MCED) screening
 #'
 #' This function simulates cancer outcomes in a single individual with a given starting age using a "parallel universe" approach.
-#' That is, cancer outcomes in the population are simulated with and without MCED screening.  The natural history (i.e., the times of cancer onset and clinical diagnosis) for 
+#' That is, cancer outcomes are simulated with and without MCED screening.  The natural history (i.e., the times of cancer onset and clinical diagnosis) for 
 #' is the same in both screening and no-screening scenarios.  
 #' The user specifies cancer sites in the MCED screening test.  The user also provides sensitivity of the tests for early and late-stage disease, where early refers to AJCC 7 stages I-II and late, III-IV, except for
 #' pancreas cancer, where early is stage I and late, II-IV. 
