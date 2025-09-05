@@ -1,8 +1,22 @@
 #####################################################
-#' Simulate an individual with and without MCED screening.
+#' Simulate a single individual with and without Multicancer Early Detection (MCED) screening
 #'
-#' Simulates cancer onset, screening detection, and death (cancer or other-cause) for a single individual.
+#' This function simulates cancer outcomes in a single individual with a given starting age using a "parallel universe" approach.
+#' That is, cancer outcomes in the population are simulated with and without MCED screening.  The natural history (i.e., the times of cancer onset and clinical diagnosis) for 
+#' is the same in both screening and no-screening scenarios.  
+#' The user specifies cancer sites in the MCED screening test.  The user also provides sensitivity of the tests for early and late-stage disease, where early refers to AJCC 7 stages I-II and late, III-IV, except for
+#' pancreas cancer, where early is stage I and late, II-IV. 
+#' Natural history models for each cancer site are specified based on a list of transition rate matrices for each site.  
+#' Cancer-specific mortality is specified based on a data frame providing the parametric survival parameters for each cancer site.  Built-in tables are included in the "param_table"
+#' dataframe that loads with the built-in "parametric_surv_fits" data sets. 
+#' Other-cause mortality is based on other-cause life tables that can be extracted with the function "make_othercause_death_table."
 #'
+#' The function tracks only the first cancer diagnosis based on pre-clinical onset. 
+#' Cancer-specific mortality in the screen arm assumes a stage-shift benefit of screening. That is, individuals
+#' who are diagnosed in early stage under screening but who would have been diagnosed in late stage clinically, are assume to remain in early stage post lead-time. 
+#' For both screened and unscreened individuals, cancer mortality is projected from the point of clinical diagnosis (i.e., post lead-time) to prevent
+#' lead-time bias.
+#'  
 #' @param ID Numeric ID for the individual.
 #' @param cancer_sites Vector of selected cancer sites.
 #' @param rates_list List of transition rate matrices for each cancer site.
@@ -10,10 +24,10 @@
 #' @param MCED_specificity Overall specificity for the MCED test (not specific to cancer site)
 #' @param other_cause_death_dist A table representing other-cause mortality.
 #' @param starting_age Starting age for simulation.
-#' @param num_screens Number of screenings.
+#' @param num_screens Number of screening rounds.
 #' @param screen_interval Time interval between screenings.
 #' @param end_time Ending time (age) of simulation.
-#' @param sex Character; "Male" or "Female".
+#' @param sex "Male" or "Female".
 #' @param surv_param_table Survival parameters table (for simulating cancer death).
 #' @export
 #'
@@ -137,7 +151,7 @@ sim_individual_MCED<-function( ID,
 
 
 ###########################################################
-#' Simulate multiple individuals with and without Multicancer Early Detection (MCED) screening
+#' Simulate a cohort of individuals with and without Multicancer Early Detection (MCED) screening
 #'
 #' This function simulates cancer outcomes in a population with a designated starting age using a "parallel universe" approach.
 #' That is, cancer outcomes in the population are simulated with and without MCED screening.  The natural history (i.e., the times of cancer onset and clinical diagnosis) for 

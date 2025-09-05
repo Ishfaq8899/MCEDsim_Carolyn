@@ -2,7 +2,7 @@
 % Please edit documentation in R/parallel_universe.R
 \name{sim_individual_MCED}
 \alias{sim_individual_MCED}
-\title{Simulate an individual with and without MCED screening.}
+\title{Simulate a single individual with and without Multicancer Early Detection (MCED) screening}
 \usage{
 sim_individual_MCED(
   ID,
@@ -40,7 +40,7 @@ sim_individual_MCED(
 
 \item{end_time}{Ending time (age) of simulation.}
 
-\item{sex}{Character; "Male" or "Female".}
+\item{sex}{"Male" or "Female".}
 
 \item{surv_param_table}{Survival parameters table (for simulating cancer death).}
 }
@@ -48,7 +48,22 @@ sim_individual_MCED(
 A data frame with simulation results for the individual, including cancer events, screening detection, and death info.
 }
 \description{
-Simulates cancer onset, screening detection, and death (cancer or other-cause) for a single individual.
+This function simulates cancer outcomes in a single individual with a given starting age using a "parallel universe" approach.
+That is, cancer outcomes in the population are simulated with and without MCED screening.  The natural history (i.e., the times of cancer onset and clinical diagnosis) for 
+is the same in both screening and no-screening scenarios.  
+The user specifies cancer sites in the MCED screening test.  The user also provides sensitivity of the tests for early and late-stage disease, where early refers to AJCC 7 stages I-II and late, III-IV, except for
+pancreas cancer, where early is stage I and late, II-IV. 
+Natural history models for each cancer site are specified based on a list of transition rate matrices for each site.  
+Cancer-specific mortality is specified based on a data frame providing the parametric survival parameters for each cancer site.  Built-in tables are included in the "param_table"
+dataframe that loads with the built-in "parametric_surv_fits" data sets. 
+Other-cause mortality is based on other-cause life tables that can be extracted with the function "make_othercause_death_table."
+}
+\details{
+The function tracks only the first cancer diagnosis based on pre-clinical onset. 
+Cancer-specific mortality in the screen arm assumes a stage-shift benefit of screening. That is, individuals
+who are diagnosed in early stage under screening but who would have been diagnosed in late stage clinically, are assume to remain in early stage post lead-time. 
+For both screened and unscreened individuals, cancer mortality is projected from the point of clinical diagnosis (i.e., post lead-time) to prevent
+lead-time bias.
 }
 \examples{
 result <- sim_individual_MCED(
