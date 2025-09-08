@@ -1,23 +1,27 @@
 #####################################################
-#' Simulate an individual with and without MCED screening.
-#'
-#' Simulates cancer onset, screening detection, and death (cancer or other-cause) for a single individual.
+#' Simulate an individual with and without Multicancer Early Detection (MCED) screening
+#' 
+#' This function simulates cancer outcomes for a single individual in two parallel scenarios:
+#' with scheduled MCED screening and without screening. It generates cancer onset, screen detection, 
+#' clinical diagnosis, cancer death, and other-cause death, retaining the first cancer by earliest onset.
 #'
 #' @param ID Numeric ID for the individual.
-#' @param cancer_sites Vector of selected cancer sites.
+#' @param cancer_sites Vector of cancer sites (allowable values include "Anus", ” Bladder",”Breast",  ”Colorectal", 
+#' "Esophagus"  , ”Gastric", "Headandneck", "Liver", "Lung", "Pancreas", "Prostate", "Renal", "Uterine","Ovary")
 #' @param rates_list List of transition rate matrices for each cancer site.
 #' @param test_performance A list with early_sens, late_sens, and specificities for the test.
 #' @param MCED_specificity Overall specificity for the MCED test (not specific to cancer site)
 #' @param other_cause_death_dist A table representing other-cause mortality.
 #' @param starting_age Starting age for simulation.
-#' @param num_screens Number of screenings.
-#' @param screen_interval Time interval between screenings.
+#' @param num_screens Number of screening rounds.
+#' @param screen_interval Interval between screening rounds.
 #' @param end_time Ending time (age) of simulation.
 #' @param sex Character; "Male" or "Female".
-#' @param surv_param_table Survival parameters table (for simulating cancer death).
+#' @param surv_param_table Survival parameters table.
 #' @export
 #'
-#' @return A data frame with simulation results for the individual, including cancer events, screening detection, and death info.
+#' @return A data frame with the individual's first-cancer outcomes (onset, screen/clinical diagnosis times and stages),
+#' cancer death times with/without screening, and other-cause death.
 #' 
 #' @examples
 #' result <- sim_individual_MCED(
@@ -47,9 +51,7 @@ sim_individual_MCED<-function( ID,
                                surv_param_table){
   
   # simulate time of other cause death 
-
   other_cause_death = sim_othercause_death(other_cause_death_dist,ID=ID)
-  
   
   # Get the starting states for each cancer
   start_states= unlist(lapply(rates_list, FUN="get_init",a1=starting_age))
