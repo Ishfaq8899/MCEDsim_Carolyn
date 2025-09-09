@@ -2,7 +2,7 @@
 % Please edit documentation in R/parallel_universe.R
 \name{sim_multiple_individuals_MCED_parallel_universe}
 \alias{sim_multiple_individuals_MCED_parallel_universe}
-\title{Simulate multiple individuals with and without Multicancer Early Detection (MCED) screening}
+\title{Simulate a cohort of individuals with and without Multicancer Early Detection (MCED) screening}
 \usage{
 sim_multiple_individuals_MCED_parallel_universe(
   cancer_sites,
