@@ -2,7 +2,7 @@
 % Please edit documentation in R/parallel_universe.R
 \name{sim_individual_MCED}
 \alias{sim_individual_MCED}
-\title{Simulate an individual with and without MCED screening.}
+\title{Simulate an individual with and without Multicancer Early Detection (MCED) screening}
 \usage{
 sim_individual_MCED(
   ID,
@@ -22,7 +22,8 @@ sim_individual_MCED(
 \arguments{
 \item{ID}{Numeric ID for the individual.}
 
-\item{cancer_sites}{Vector of selected cancer sites.}
+\item{cancer_sites}{Vector of cancer sites (allowable values include "Anus", ” Bladder",”Breast",  ”Colorectal", 
+"Esophagus"  , ”Gastric", "Headandneck", "Liver", "Lung", "Pancreas", "Prostate", "Renal", "Uterine","Ovary")}
 
 \item{rates_list}{List of transition rate matrices for each cancer site.}
 
@@ -34,21 +35,24 @@ sim_individual_MCED(
 
 \item{starting_age}{Starting age for simulation.}
 
-\item{num_screens}{Number of screenings.}
+\item{num_screens}{Number of screening rounds.}
 
-\item{screen_interval}{Time interval between screenings.}
+\item{screen_interval}{Interval between screening rounds.}
 
 \item{end_time}{Ending time (age) of simulation.}
 
 \item{sex}{Character; "Male" or "Female".}
 
-\item{surv_param_table}{Survival parameters table (for simulating cancer death).}
+\item{surv_param_table}{Survival parameters table.}
 }
 \value{
-A data frame with simulation results for the individual, including cancer events, screening detection, and death info.
+A data frame with the individual's first-cancer outcomes (onset, screen/clinical diagnosis times and stages),
+cancer death times with/without screening, and other-cause death.
 }
 \description{
-Simulates cancer onset, screening detection, and death (cancer or other-cause) for a single individual.
+This function simulates cancer outcomes for a single individual in two parallel scenarios:
+with scheduled MCED screening and without screening. It generates cancer onset, screen detection, 
+clinical diagnosis, cancer death, and other-cause death, retaining the first cancer by earliest onset.
 }
 \examples{
 result <- sim_individual_MCED(

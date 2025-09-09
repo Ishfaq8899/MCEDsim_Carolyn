@@ -4,6 +4,15 @@
 #' This function simulates cancer outcomes for a single individual in two parallel scenarios:
 #' with scheduled MCED screening and without screening. It generates cancer onset, screen detection, 
 #' clinical diagnosis, cancer death, and other-cause death, retaining the first cancer by earliest onset.
+#' 
+#' The user specifies cancer sites in the MCED screening test. The user also provides sensitivity of the 
+#' tests for early and late-stage disease, where early refers to AJCC 7 stages I-II and late, III-IV, except
+#' for pancreas cancer, where early is stage I and late, II-IV. 
+#' Natural history models are based on built-in fitted models that are calibrated to SEER 2015-2021 data by 
+#' age and sex and can be specified based on user-provided inputs about the overall mean sojourn time (OMST) 
+#' and the late mean sojourn time (LMST) for each cancer site. 
+#' The function tracks only the first cancer diagnosis based on pre-clinical onset. 
+#' 
 #'
 #' @param ID Numeric ID for the individual.
 #' @param cancer_sites Vector of cancer sites (allowable values include "Anus", ” Bladder",”Breast",  ”Colorectal", 
@@ -24,9 +33,20 @@
 #' cancer death times with/without screening, and other-cause death.
 #' 
 #' @examples
+#' library(MCEDsim)
+#' #Load the prefitted natural history models
+#' data("combined_fits")
+#' #Load the prefitted cause-specific survival models
+#' data("parametric_surv_fits")
+#' 
+#' #' # Cancer sites in the MCED test
+#' cancer_sites_vec <- c("Anus", "Bladder", "Breast", "Esophagus",
+#'                      "Gastric", "Headandneck", "Liver", 
+#'                      "Lung", "Pancreas", "Prostate", "Renal", "Uterine", "Ovary")
+#' 
 #' result <- sim_individual_MCED(
 #'   ID = 1,
-#'   cancer_sites = c("Lung", "Colorectal"),
+#'   cancer_sites = cancer_sites_vec,
 #'   rates_list = example_rates_list,
 #'   test_performance = example_test_perf,
 #'   other_cause_death_dist = example_death_dist,
@@ -35,7 +55,7 @@
 #'   screen_interval = 1,
 #'   end_time = 90,
 #'   sex = "Male",
-#'   surv_param_table = example_surv_table
+#'   surv_param_table = param_table
 #' )
 sim_individual_MCED<-function( ID, 
                                cancer_sites,
@@ -156,7 +176,7 @@ sim_individual_MCED<-function( ID,
 #' For both screened and unscreened individuals, cancer mortality is projected from the point of clinical diagnosis (i.e., post lead-time) to prevent
 #' lead-time bias.
 #'  
-#' @param cancer_sites Vector of cancer sites (allowable values include "Anus",  ” Bladder" ,  ”Breast",  ”Colorectal" , "Esophagus"  , ”Gastric", "Headandneck", 
+#' @param cancer_sites Vector of cancer sites (allowable values include "Anus", ” Bladder" ,  ”Breast",  ”Colorectal" , "Esophagus"  , ”Gastric", "Headandneck", 
 #' "Liver" ,  "Lung",   "Pancreas", "Prostate", "Renal", "Uterine","Ovary")
 #' @param LMST_vec Vector of late mean sojourn times for each cancer site.
 #' @param OMST_vec Vector of overall mean sojourn times for each cancer site.
