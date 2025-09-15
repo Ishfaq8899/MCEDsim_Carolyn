@@ -27,7 +27,7 @@ sim_multiple_individuals_MCED_parallel_universe(
 )
 }
 \arguments{
-\item{cancer_sites}{Vector of cancer sites (allowable values include "Anus",  ” Bladder" ,  ”Breast",  ”Colorectal" , "Esophagus"  , ”Gastric", "Headandneck", 
+\item{cancer_sites}{Vector of cancer sites (allowable values include "Anus", ” Bladder" ,  ”Breast",  ”Colorectal" , "Esophagus"  , ”Gastric", "Headandneck", 
 "Liver" ,  "Lung",   "Pancreas", "Prostate", "Renal", "Uterine","Ovary")}
 
 \item{LMST_vec}{Vector of late mean sojourn times for each cancer site.}
