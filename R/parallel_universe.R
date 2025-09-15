@@ -1,32 +1,11 @@
 #####################################################
-<<<<<<< HEAD
 #' Simulate an individual with and without Multicancer Early Detection (MCED) screening
 #' 
 #' This function simulates cancer outcomes for a single individual in two parallel scenarios:
 #' with scheduled MCED screening and without screening. It generates cancer onset, screen detection, 
 #' clinical diagnosis, cancer death, and other-cause death, retaining the first cancer by earliest onset.
-#' 
-#' The user specifies cancer sites in the MCED screening test. The user also provides sensitivity of the 
-#' tests for early and late-stage disease, where early refers to AJCC 7 stages I-II and late, III-IV, except
-#' for pancreas cancer, where early is stage I and late, II-IV. 
-#' Natural history models are based on built-in fitted models that are calibrated to SEER 2015-2021 data by 
-#' age and sex and can be specified based on user-provided inputs about the overall mean sojourn time (OMST) 
-#' and the late mean sojourn time (LMST) for each cancer site. 
-#' The function tracks only the first cancer diagnosis based on pre-clinical onset. 
-#' 
-=======
-#' Simulate a single individual with and without Multicancer Early Detection (MCED) screening
 #'
-#' This function simulates cancer outcomes in a single individual with a given starting age using a "parallel universe" approach.
-#' That is, cancer outcomes are simulated with and without MCED screening.  The natural history (i.e., the times of cancer onset and clinical diagnosis) for 
-#' is the same in both screening and no-screening scenarios.  
-#' The user specifies cancer sites in the MCED screening test.  The user also provides sensitivity of the tests for early and late-stage disease, where early refers to AJCC 7 stages I-II and late, III-IV, except for
-#' pancreas cancer, where early is stage I and late, II-IV. 
 #' Natural history models for each cancer site are specified based on a list of transition rate matrices for each site.  
-#' Cancer-specific mortality is specified based on a data frame providing the parametric survival parameters for each cancer site.  Built-in tables are included in the "param_table"
-#' dataframe that loads with the built-in "parametric_surv_fits" data sets. 
-#' Other-cause mortality is based on other-cause life tables that can be extracted with the function "make_othercause_death_table."
-#'
 #' The function tracks only the first cancer diagnosis based on pre-clinical onset. 
 #' Cancer-specific mortality in the screen arm assumes a stage-shift benefit of screening. That is, individuals
 #' who are diagnosed in early stage under screening but who would have been diagnosed in late stage clinically, are assume to remain in early stage post lead-time. 
