@@ -75,3 +75,30 @@ sim_cancer_death_param <- function(the_stage, the_cancer_site, the_sex,ID=NA,the
   return(death_time)
 }
 
+
+sim_cancer_deaths_screen_no_screen<-function(clinical_diagnosis_time,clinical_diagnosis_stage,cancer_site,sex,ID,
+                                             screen_diagnosis_stage,surv_param_table){
+
+  #browser()
+  cancer_death_time_no_screen=clinical_diagnosis_time+sim_cancer_death_param(the_stage=clinical_diagnosis_stage,
+                                                                                  the_cancer_site=cancer_site,
+                                                                                  the_sex=sex,
+                                                                                  the_model_type="Loglogistic",
+                                                                                  param_table=surv_param_table,ID=ID)
+
+
+
+cancer_death_time_screen=ifelse((screen_diagnosis_stage!=clinical_diagnosis_stage&!is.na(screen_diagnosis_stage))&!
+                                           is.na(clinical_diagnosis_stage),
+                                         clinical_diagnosis_time+
+                                           sim_cancer_death_param(the_stage="Early",
+                                                                  the_cancer_site=cancer_site,
+                                                                  the_sex=sex,
+                                                                  the_model_type="Loglogistic",
+                                                                  param_table=surv_param_table,
+                                                                  ID=ID),
+                                         cancer_death_time_no_screen)
+
+return(data.frame(cancer_death_time_screen=cancer_death_time_screen, cancer_death_time_no_screen=cancer_death_time_no_screen,ID=ID,cancer_site=cancer_site))
+}
+

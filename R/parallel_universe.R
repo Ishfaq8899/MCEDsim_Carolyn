@@ -1,3 +1,8 @@
+
+
+
+
+
 #####################################################
 #' Simulate an individual with and without Multicancer Early Detection (MCED) screening
 #' 
@@ -102,6 +107,8 @@ sim_individual_MCED<-function( ID,
   result$other_cause_death_status <- other_cause_death$status
   result$other_cause_death_time <- other_cause_death$time
   result$sex=sex
+  
+  stored_result=result
   #-----------------------  
   # Identify first cancer by onset time
   #-----------------------
@@ -109,6 +116,7 @@ sim_individual_MCED<-function( ID,
   result$cancer_death_time_no_screen=NA
   result$cancer_death_time_screen=NA
   
+ 
    if (sum(!is.na(result$onset_time)>=1)) {
     
     first_cancer_row <- result %>%
@@ -146,6 +154,7 @@ sim_individual_MCED<-function( ID,
                  
       
     }
+
     result<-first_cancer_row
  
   
@@ -153,10 +162,13 @@ sim_individual_MCED<-function( ID,
     result<-slice_head(result,n=1)%>%mutate(cancer_site=NA)
   } 
 
+  
+  stored_result <- stored_result %>% filter(!cancer_site==result$cancer_site)
+  
   set.seed(ID)
   result<-result %>% mutate(FP_tot=rbinom(n(),size=total_no_canc_screens,prob=1-MCED_specificity))
 
-  return(result)
+  return(list(first_result=result,stored_result=stored_result))
 }
 
 
@@ -344,28 +356,59 @@ sim_multiple_individuals_MCED_parallel_universe <- function(cancer_sites,
                                                 MCED_specificity=MCED_specificity),
                                 SIMPLIFY = FALSE)
   
+  first_site_female=lapply(results_list_female,"[[","first_result")
+  additional_sites_female=lapply(results_list_female,"[[","stored_result")
+ 
+  first_site_male=lapply(results_list_male,"[[","first_result")
+  additional_sites_male=lapply(results_list_male,"[[","stored_result")
+  
+  # Combine all individual results (first cancers and additional cancers) 
+  combined_first_results_males <- do.call(rbind, first_site_male)%>%mutate(sex="Male")
+  combined_first_results_females <- do.call(rbind, first_site_male)%>%mutate(sex="Female")
+  
+  
+  combined_additional_results_males <- do.call(rbind, additional_sites_male)%>%mutate(sex="Male")
+  combined_additional_results_females <- do.call(rbind, additional_sites_female)%>%mutate(sex="Female")
   
   
   
+  combined_first_results=bind_rows(combined_first_results_males,combined_first_results_females)%>%
+  mutate(start_age=starting_age,end_time=ending_age)
   
+  combined_additional_results=bind_rows(combined_additional_results_males,combined_additional_results_females)%>%
+    mutate(start_age=starting_age,end_time=ending_age)
   
-  # Combine all individual results into one data frame
-  combined_results_males <- do.call(rbind, results_list_male)%>%mutate(sex="Male")
-  combined_results_females <- do.call(rbind, results_list_female)%>%mutate(sex="Female")
+ 
 
-    combined_results=bind_rows(combined_results_males,combined_results_females)%>%
-                   mutate(start_age=starting_age,end_time=ending_age)
-  
-  
-  #Simulate times of cancer_death_time screen for individuals diagnosed early via screening but late via clinical diagnosis
-   # temp=filter(combined_results,(screen_diagnosis_stage!=clinical_diagnosis_stage&!is.na(screen_diagnosis_stage))&!is.na(clinical_diagnosis_stage))
-   # temp$cancer_death_time_screen=temp$clinical_diagnosis_time+mapply(temp$screen_diagnosis_stage,temp$cancer_site,temp$sex,temp$ID*8,FUN="sim_cancer_death_param",
-   #             MoreArgs=list(the_model_type="Loglogistic",
-   #                           param_table=surv_param_table))
-   # 
-  # combined_results=bind_rows(temp,subset(combined_results,!ID%in%temp$ID))
+  #filter additional cancers for those whose clinical diagnosis is prior to other cause death
+  combined_additional_results <-   combined_additional_results %>% filter(clinical_diagnosis_time <=other_cause_death_time)
 
-    
+  #browser()
+  #simulate cancer-specific deaths for additional cancers
+  addtl_cancer_deaths=mapply(FUN="sim_cancer_deaths_screen_no_screen",clinical_diagnosis_time=combined_additional_results$clinical_diagnosis_time,
+         clinical_diagnosis_stage=combined_additional_results$clinical_diagnosis_stage,
+         cancer_site=combined_additional_results$cancer_site,
+         sex=combined_additional_results$sex,
+         ID=combined_additional_results$ID,
+         screen_diagnosis_stage=combined_additional_results$screen_diagnosis_stage,
+         MoreArgs=list(surv_param_table=surv_param_table),SIMPLIFY=F)  
+  
+
+  
+ # browser()
+  combined_additional_results=data.frame(do.call(rbind,addtl_cancer_deaths))%>%inner_join(combined_additional_results, by=c("ID","cancer_site"))
+   
+  ##STOPPED HERE
+  # Next steps: filter combined_first_results to divide it into people who have a clinical diagnsosis before other cause death
+  # and people who do not. 
+  # The latter will be eligible for reassignment of cancer from combined_additional_results
+  # Then we will stratify the latter group by age of other cause death in X year stratify
+  # Then we will assign the additional cancers based on age of OC death stratum.
+  # Hint: look up the cut function for devising age group categories.  
+  #################################
+  
+     
+  
     #Process data with other cause death as a censoring event
     
     #Ascertain age at at screen and clinical diagnosis in presence of other cause death
