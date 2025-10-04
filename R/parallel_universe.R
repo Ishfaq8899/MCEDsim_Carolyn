@@ -395,7 +395,7 @@ sim_multiple_individuals_MCED_parallel_universe <- function(cancer_sites,
   
 
   
- # browser()
+  browser()
   combined_additional_results=data.frame(do.call(rbind,addtl_cancer_deaths))%>%inner_join(combined_additional_results, by=c("ID","cancer_site"))
    
   ##STOPPED HERE

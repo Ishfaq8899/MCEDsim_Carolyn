@@ -9,7 +9,7 @@ Description: More about what it does (maybe more than one line)
 License: What license is it under?
 Encoding: UTF-8
 LazyData: true
-URL: https://github.com/Ishfaq8899/MCEDsim
-BugReports: https://github.com/Ishfaq8899/MCEDsim/issues
+URL: https://github.com/Ishfaq8899/MCEDsim_Carolyn
+BugReports: https://github.com/Ishfaq8899/MCEDsim_Carolyn/issues
 RoxygenNote: 7.3.3
-Imports: msm,dplyr,survobj,purrr
+Imports: msm,dplyr,survobj,purrr, tidyr 
