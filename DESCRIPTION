@@ -12,4 +12,4 @@ LazyData: true
 URL: https://github.com/Ishfaq8899/MCEDsim_Carolyn
 BugReports: https://github.com/Ishfaq8899/MCEDsim_Carolyn/issues
 RoxygenNote: 7.3.3
-Imports: msm,dplyr,survobj,purrr, tidyr 
+Imports: msm,dplyr,survobj,purrr
