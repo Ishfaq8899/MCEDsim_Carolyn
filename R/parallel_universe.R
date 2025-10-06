@@ -108,6 +108,7 @@ sim_individual_MCED<-function( ID,
   result$other_cause_death_time <- other_cause_death$time
   result$sex=sex
   
+  browser()
   stored_result=result
   #-----------------------  
   # Identify first cancer by onset time
@@ -133,7 +134,7 @@ sim_individual_MCED<-function( ID,
                                                        #param_table=surv_param_table)
 
     if(!is.na(first_cancer_row$clinical_diagnosis_stage)){
-     
+
     first_cancer_row <-first_cancer_row  %>%mutate(cancer_death_time_no_screen=clinical_diagnosis_time+sim_cancer_death_param(the_stage=clinical_diagnosis_stage,
                                                                                                        the_cancer_site=cancer_site,
                                                                                                        the_sex=sex,
@@ -283,7 +284,7 @@ sim_multiple_individuals_MCED_parallel_universe <- function(cancer_sites,
                                          surv_param_table)
 {
   
- # browser()
+  browser()
   # Creat a vector of IDs
   IDs_male <- 1:num_males
   IDs_female <-(num_males+1):(num_females+num_males)
@@ -305,6 +306,7 @@ sim_multiple_individuals_MCED_parallel_universe <- function(cancer_sites,
   rates_list_female = rates_list_female$rates_list                                    
  
   # Extract sensitivities and specificity based on selected cancer sites
+
   test_performance_male = test_performance_dataframe %>% filter(cancer_site %in% as.vector(sites_male))
   test_performance_female = test_performance_dataframe %>% filter(cancer_site %in% as.vector(sites_female))
   
@@ -395,7 +397,7 @@ sim_multiple_individuals_MCED_parallel_universe <- function(cancer_sites,
   
 
   
-  browser()
+
   combined_additional_results=data.frame(do.call(rbind,addtl_cancer_deaths))%>%inner_join(combined_additional_results, by=c("ID","cancer_site"))
    
   ##STOPPED HERE
