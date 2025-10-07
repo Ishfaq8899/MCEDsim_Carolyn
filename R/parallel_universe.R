@@ -108,7 +108,7 @@ sim_individual_MCED<-function( ID,
   result$other_cause_death_time <- other_cause_death$time
   result$sex=sex
   
-  browser()
+ # browser()
   stored_result=result
   #-----------------------  
   # Identify first cancer by onset time
@@ -284,7 +284,7 @@ sim_multiple_individuals_MCED_parallel_universe <- function(cancer_sites,
                                          surv_param_table)
 {
   
-  browser()
+  #browser()
   # Creat a vector of IDs
   IDs_male <- 1:num_males
   IDs_female <-(num_males+1):(num_females+num_males)
@@ -381,7 +381,8 @@ sim_multiple_individuals_MCED_parallel_universe <- function(cancer_sites,
     mutate(start_age=starting_age,end_time=ending_age)
   
  
-
+  #Note: consider if we want to use cancer onset or clinical diagnosis for additional cancers for purpose of calculating over diagnosis. 
+  #If we decide this is important, change clinical_diagnosis_time to cancer_onset_time in the subsequent code
   #filter additional cancers for those whose clinical diagnosis is prior to other cause death
   combined_additional_results <-   combined_additional_results %>% filter(clinical_diagnosis_time <=other_cause_death_time)
 
@@ -398,19 +399,51 @@ sim_multiple_individuals_MCED_parallel_universe <- function(cancer_sites,
 
   
 
-  combined_additional_results=data.frame(do.call(rbind,addtl_cancer_deaths))%>%inner_join(combined_additional_results, by=c("ID","cancer_site"))
+  combined_additional_results=data.frame(do.call(rbind,addtl_cancer_deaths))%>%inner_join(combined_additional_results, by=c("ID","cancer_site"))%>%
+    mutate(age_OC_death_cat=cut(other_cause_death_time,breaks=seq(0,150,by=5)))
+
+
    
+ 
   ##STOPPED HERE
-  # Next steps: filter combined_first_results to divide it into people who have a clinical diagnsosis before other cause death
-  # and people who do not. 
   # The latter will be eligible for reassignment of cancer from combined_additional_results
   # Then we will stratify the latter group by age of other cause death in X year stratify
   # Then we will assign the additional cancers based on age of OC death stratum.
-  # Hint: look up the cut function for devising age group categories.  
-  #################################
+   #################################
   
-     
+  primary_cancer <- combined_first_results %>% filter(clinical_diagnosis_time<=other_cause_death_time)
+ 
+  no_primary_cancer <- combined_first_results %>% filter(clinical_diagnosis_time>other_cause_death_time)%>%
+    mutate(age_OC_death_cat=cut(other_cause_death_time,breaks=seq(0,150,by=5)))
   
+  N_multiple_cancers=nrow(combined_additional_results)
+  N_primary_cancers=nrow(primary_cancer)
+  N_no_primary_cancer=nrow(no_primary_cancer)
+  
+  
+  no_primary_cancer <- no_primary_cancer %>% mutate(index=seq(1,nrow(no_primary_cancer)))
+  
+  no_match_counter=0
+  while(nrow(combined_additional_results)>0){
+    test=match_individual(i=1,combined_additional_results=combined_additional_results, no_primary_cancer=no_primary_cancer)
+   
+    if(length(test)>1){
+     primary_cancer=bind_rows(combined_additional_results[1,],primary_cancer)
+    no_primary_cancer=no_primary_cancer%>%filter(index!=test$index)
+    }else{
+      no_match_counter=no_match_counter+1
+    }
+    combined_additional_results=combined_additional_results[-1,]
+    
+}
+
+  N_multiple_cancers_2=nrow(combined_additional_results)
+  N_primary_cancers_2=nrow(primary_cancer)
+  N_no_primary_cancer_2=nrow(no_primary_cancer)
+
+  combined_results=bind_rows(primary_cancer,no_primary_cancer) 
+  
+ 
     #Process data with other cause death as a censoring event
     
     #Ascertain age at at screen and clinical diagnosis in presence of other cause death
@@ -467,7 +500,10 @@ sim_multiple_individuals_MCED_parallel_universe <- function(cancer_sites,
                                
     )
     
-  return(combined_results)
+    return(list(
+      results = combined_results,
+      no_match_counter = no_match_counter
+    ))
 }
 
 

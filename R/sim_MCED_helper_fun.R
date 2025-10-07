@@ -57,3 +57,21 @@ get_init <- function(rate.matrix, a1) {
   init_state <- sample(1:k, size = 1, prob = init)
   return(init_state)
 }
+
+#' @export
+match_individual<- function(i,  combined_additional_results, no_primary_cancer){
+  
+  out<-no_primary_cancer %>% filter(sex==combined_additional_results[i,"sex"]&age_OC_death_cat==combined_additional_results[i,"age_OC_death_cat"])
+  
+  if(nrow(out)>0){
+    return(out[1,])
+  }else{
+    print("No match")
+    return("no_match")
+  }
+}
+  
+  
+  
+  
+  
