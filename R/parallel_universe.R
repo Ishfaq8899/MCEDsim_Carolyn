@@ -500,10 +500,7 @@ sim_multiple_individuals_MCED_parallel_universe <- function(cancer_sites,
                                
     )
     
-    return(list(
-      results = combined_results,
-      no_match_counter = no_match_counter
-    ))
+    return(list(results = combined_results,no_match_counter = no_match_counter))
 }
 
 
