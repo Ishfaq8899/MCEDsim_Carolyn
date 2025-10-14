@@ -390,12 +390,13 @@ sim_multiple_individuals_MCED_parallel_universe <- function(cancer_sites,
                              MoreArgs=list(surv_param_table=surv_param_table),SIMPLIFY=F)  
   
   #Join cancer-specific deaths with cancer diagnoses for additional cancers
-  combined_additional_results=data.frame(do.call(rbind,addtl_cancer_deaths))%>%inner_join(combined_additional_results, by=c("ID","cancer_site"))%>%
-    mutate(age_OC_death_cat=cut(other_cause_death_time,breaks=seq(0,150,by=5)))
-  
-  
-#  combined_additional_CRC_results <- bind_rows(combined_additional_results,)
-  
+  combined_additional_results=data.frame(do.call(rbind,addtl_cancer_deaths))%>%inner_join(combined_additional_results, by=c("ID","cancer_site"))
+
+ #combine the CRC data with the additional cancers for reassignment.  CRC diagnoses that occur after other cause death do not 
+  #need to be reassigned so these people are removed from combined_additional_results.
+  combined_additional_results <- bind_rows(combined_additional_results, CRC_data)%>%
+    mutate(age_OC_death_cat=cut(other_cause_death_time,breaks=seq(0,150,by=5)))%>% 
+    filter(clinical_diagnosis_time <=other_cause_death_time)
   
   #Identify people who have clinical diagnosis of first cancer prior to other cause death  
   primary_cancer <- combined_first_results %>% filter(clinical_diagnosis_time<=other_cause_death_time)
@@ -433,16 +434,15 @@ sim_multiple_individuals_MCED_parallel_universe <- function(cancer_sites,
     
   }
   
+  
   #check to see if the added and subtracted rows match expectations based on previous loop. 
   N_multiple_cancers_2=nrow(combined_additional_results)
   N_primary_cancers_2=nrow(primary_cancer)
   N_no_primary_cancer_2=nrow(no_primary_cancer)
   
-  
   #Final data with all cancers combined (first cancers and reassigned cancers)
   combined_results=bind_rows(primary_cancer,no_primary_cancer) 
-  
-  
+
   #Process data with other cause death as a censoring event
   
   #Ascertain age at at screen and clinical diagnosis in presence of other cause death
