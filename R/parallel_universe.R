@@ -206,6 +206,7 @@ sim_individual_MCED<-function( ID,
 #' @param hmd_data Human Mortality Database data.
 #' @param MCED_cdc CDC data for MCED.
 #' @param surv_param_table Survival parameters table.
+#' @param CRC_data CRC data.
 #' @export
 #'
 #' @return A data frame with combined simulated results for all individuals.
@@ -276,7 +277,8 @@ sim_multiple_individuals_MCED_parallel_universe <- function(cancer_sites,
                                                             cdc_data, 
                                                             hmd_data,
                                                             MCED_cdc,
-                                                            surv_param_table)
+                                                            surv_param_table,
+                                                            CRC_data)
 {
   
   #browser()
@@ -390,6 +392,9 @@ sim_multiple_individuals_MCED_parallel_universe <- function(cancer_sites,
   #Join cancer-specific deaths with cancer diagnoses for additional cancers
   combined_additional_results=data.frame(do.call(rbind,addtl_cancer_deaths))%>%inner_join(combined_additional_results, by=c("ID","cancer_site"))%>%
     mutate(age_OC_death_cat=cut(other_cause_death_time,breaks=seq(0,150,by=5)))
+  
+  
+#  combined_additional_CRC_results <- bind_rows(combined_additional_results,)
   
   
   #Identify people who have clinical diagnosis of first cancer prior to other cause death  
