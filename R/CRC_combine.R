@@ -183,23 +183,6 @@ sim_MCED_parallel_universe_before_CRC <- function(cancer_sites,
                                                 MCED_specificity=MCED_specificity),
                                 SIMPLIFY = FALSE)
   
-  
-  
- 
-  return(list(results_list_female=results_list_female,results_list_male=results_list_male))
-}
-  
-  
-
-
-#' @export
-combine_MCED_CRC<- function(results_list_female,
-                            results_list_male,
-                            starting_age,
-                            ending_age,
-                            CRC_data,
-                            surv_param_table){
-  
   #get the first cancer and additional cancers for all individuals
   first_site_female=lapply(results_list_female,"[[","first_result")
   additional_sites_female=lapply(results_list_female,"[[","stored_result")
@@ -219,7 +202,23 @@ combine_MCED_CRC<- function(results_list_female,
   combined_additional_results=bind_rows(combined_additional_results_males,combined_additional_results_females)%>%
     mutate(start_age=starting_age,end_time=ending_age)
   
+
+ 
+  return(list(combined_additional_results=combined_additional_results,  combined_first_results=combined_first_results))
+}
   
+  
+
+
+#' @export
+combine_MCED_CRC<- function(combined_first_results,
+                            combined_additional_results,
+                            starting_age,
+                            ending_age,
+                            CRC_data,
+                            surv_param_table){
+  
+
   #Note: consider if we want to use cancer onset or clinical diagnosis for additional cancers for purpose of calculating over diagnosis. 
   #If we decide this is important, change clinical_diagnosis_time to cancer_onset_time in the subsequent code
   
