@@ -161,7 +161,7 @@ sim_individual_MCED<-function( ID,
   
   stored_result <- stored_result %>% filter(!cancer_site==result$cancer_site)
   
-  set.seed(ID)
+ # set.seed(ID)
   result<-result %>% mutate(FP_tot=rbinom(n(),size=total_no_canc_screens,prob=1-MCED_specificity))
   
   return(list(first_result=result,stored_result=stored_result))

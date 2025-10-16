@@ -208,7 +208,7 @@ get.obs.data.individual <- function(ID, rate.matrix, emission.matrix,
 #####################
   
   #set random seed based on ID
-  set.seed(ID)
+ # set.seed(ID)
   # Simulate CTMC trajectory for individual
   trajectory <- sim.ctmc(rate.matrix = rate.matrix, start.state = start.state, 
                          end.time = end.time, start.time = start.time,absorbing.states=c(n_states-1,n_states))
