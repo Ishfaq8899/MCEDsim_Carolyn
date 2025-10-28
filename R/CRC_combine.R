@@ -224,21 +224,42 @@ sim_MCED_parallel_universe_before_CRC <- function(cancer_sites,
 #' Combine MCED Results with Colorectal Cancer Data
 #'
 #' @description
-#' This function integrates colorectal cancer (CRC) data with MCED simulation results, simulates cancer-specific survival
-#' for additional cancers diagnosed before other-cause death, and implements a reassignment algorithm to match additional
-#' cancers to individuals without primary cancer diagnoses based on age-at-death strata. The function processes competing 
-#' risks between cancer deaths, other-cause deaths, and censoring to calculate diagnosis and death outcomes in both screening
-#' and no-screening scenarios, while identifying overdiagnosis cases where cancers are screen-detected but would not have been
-#' clinically diagnosed before death from other causes.
+#' Integrates colorectal cancer (CRC) outcomes with MCED simulation results. The function:
+#' (1) filters additional cancers to those clinically diagnosable before other-cause death,
+#' (2) simulates cancer-specific survival for these additional cancers,
+#' (3) reassigns additional cancers to individuals without a primary cancer diagnosis using
+#'     5-year other-cause-death age strata, and
+#' (4) computes competing-risk outcomes (diagnosis ages/events and death ages/events) for
+#'     both screening and no-screening scenarios, including an overdiagnosis indicator.
 #'
-#' @param combined_first_results Data frame of first cancer diagnoses from function(sim_MCED_parallel_universe_before_CRC())
-#' @param combined_additional_results Data frame of additional cancer diagnoses
+#' @param combined_first_results Data frame of first cancer diagnoses output from 
+#'   function(sim_MCED_parallel_universe_before_CRC())
+#' @param combined_additional_results Data frame of additional (non-first) cancer diagnoses
 #' @param starting_age Numeric starting age for cohort
 #' @param ending_age Numeric ending age for simulation
 #' @param CRC_data Data frame containing colorectal cancer simulation results
 #' @param surv_param_table Data frame of cancer-specific survival parameters
 #' 
+#' @details
+#' The reassignment algorithm attempts to match each additional cancer to an individual
+#'  without a primary cancer diagnosis in the same 5-year other-cause-death age stratum.
+#'  If a match is found, the additional cancer is reassigned to that individual; unmatched
+#'  additional cancers increment \code{no_match_counter}.
 #' @export
+#'  
+#' @return A list with two elements: results(A data frame for all individuals after reassignment and
+#'                                   competing-risk processing)
+#'                                   no_match_counter (total number of additional cancers that could
+#'                                   not be reassigned to a no-primary-cancer individual within the same age stratum)
+#'
+#' @examples
+#' out <- combine_MCED_CRC(combined_first_results = combined_first_results,
+#'                        combined_additional_results = combined_additional_results,
+#'                         starting_age = 45,
+#'                        ending_age   = 500,
+#'                        CRC_data = CRC_data,
+#'                        surv_param_table = param_table
+#' )
 combine_MCED_CRC<- function(combined_first_results,
                             combined_additional_results,
                             starting_age,
@@ -254,13 +275,16 @@ combine_MCED_CRC<- function(combined_first_results,
   
   
   #Simulate cancer-specific deaths for additional cancers
-  addtl_cancer_deaths=mapply(FUN="sim_cancer_deaths_screen_no_screen",clinical_diagnosis_time=combined_additional_results$clinical_diagnosis_time,
-                             clinical_diagnosis_stage=combined_additional_results$clinical_diagnosis_stage,
-                             cancer_site=combined_additional_results$cancer_site,
-                             sex=combined_additional_results$sex,
-                             ID=combined_additional_results$ID,
-                             screen_diagnosis_stage=combined_additional_results$screen_diagnosis_stage,
-                             MoreArgs=list(surv_param_table=surv_param_table),SIMPLIFY=F) 
+  addtl_cancer_deaths=mapply(
+    FUN="sim_cancer_deaths_screen_no_screen",
+    clinical_diagnosis_time  = combined_additional_results$clinical_diagnosis_time,
+    clinical_diagnosis_stage = combined_additional_results$clinical_diagnosis_stage,
+                 cancer_site = combined_additional_results$cancer_site,
+                         sex = combined_additional_results$sex,
+                          ID = combined_additional_results$ID,
+      screen_diagnosis_stage = combined_additional_results$screen_diagnosis_stage,
+               MoreArgs = list(surv_param_table=surv_param_table),
+               SIMPLIFY = F) 
   
   #Join cancer-specific deaths with cancer diagnoses for additional cancers
   combined_additional_results = data.frame(do.call(rbind,addtl_cancer_deaths))%>%
@@ -288,8 +312,6 @@ combine_MCED_CRC<- function(combined_first_results,
   N_primary_cancers=nrow(primary_cancer)
   N_no_primary_cancer=nrow(no_primary_cancer)
   
-  
-  
   # Set index as ID to identify specific individual without primary cancer (used in bookkeeping in next step)
   no_primary_cancer <- no_primary_cancer %>% mutate(index=seq(1,nrow(no_primary_cancer)))
   
@@ -298,12 +320,12 @@ combine_MCED_CRC<- function(combined_first_results,
   #   no_primary_cancer within the same OC death strata. 
   # Then it adds the combined_additional_results row to primary_cancer and removes the matching row from
   #   no_primary cancer, since they are not eligible to matched again. 
-  # Finally, it removes the row from combined_additional_results and updates the no_match_counter.  
+  # Finally, it removes the row from combined_additional_results and updates the no_match_counter.
   no_match_counter=0
   while(nrow(combined_additional_results)>0){
     # Attempt to match first row of additional cancers
     test = match_individual(
-      i=1,
+      i = 1,
       combined_additional_results = combined_additional_results,
       no_primary_cancer = no_primary_cancer
     )
@@ -388,3 +410,88 @@ combine_MCED_CRC<- function(combined_first_results,
   
   return(list(results = combined_results, no_match_counter = no_match_counter))
 }
+
+#########################################
+# Combine MCED and CRC data for specific age category and sex
+
+#' @description
+#' Integrates CRC screening outcomes with MCED results within a specified 5-year
+#'  other-cause-death age category, processing males and females separately and
+#'  then combining the outputs.
+#'
+#' @param the_CRC_data Processed CRC data with age categories
+#' @param combined_additional_results MCED additional cancer outcomes
+#' @param combined_first_results MCED first cancer diagnoses
+#' @param the_age_cat Character string: age category (e.g., "(45,50]")
+#' 
+#' @export
+#' @return A list with with results_all: Combined MCED + CRC outcomes for age category
+#'                  no_match_all: Total number of unmatched reassignments summed
+#'                                 over males and females
+#'
+#' 
+#' @examples
+#' out_age_bin <- combine_by_age_cat_sex(
+#'                            the_CRC_data = crc_processed,
+#'             combined_additional_results = combined_addtl,
+#'                  combined_first_results = combined_first,
+#'                             the_age_cat = "(60,65]"
+#'       ) 
+#' 
+combine_by_age_cat_sex<-function(the_CRC_data,
+                                 combined_additional_results,
+                                 combined_first_results,
+                                 the_age_cat){
+  
+  # Filter CRC data by sex and age category
+  the_CRC_data_female=filter(the_CRC_data,sex=="Female"&age_OC_death_cat==the_age_cat)
+  the_CRC_data_male=filter(the_CRC_data,sex=="Male"&age_OC_death_cat==the_age_cat)
+  
+  # Add age categories to MCED datasets
+  combined_additional_results<-combined_additional_results%>% 
+    mutate(age_OC_death_cat=cut(other_cause_death_time,breaks=seq(0,150,by=5)))
+  combined_first_results<-combined_first_results%>% 
+    mutate(age_OC_death_cat=cut(other_cause_death_time,breaks=seq(0,150,by=5)))
+  
+  # Filter MCED data by sex and age category.
+  combined_additional_results_male=combined_additional_results%>%filter(sex=="Male"&age_OC_death_cat==the_age_cat)
+  combined_first_results_male=combined_first_results%>%filter(sex=="Male"&age_OC_death_cat==the_age_cat)
+  
+  combined_additional_results_female=combined_additional_results%>%filter(sex=="Female"&age_OC_death_cat==the_age_cat)
+  combined_first_results_female=combined_first_results%>%filter(sex=="Female"&age_OC_death_cat==the_age_cat)
+  
+  # Combine MCED and CRC results for males
+  results_CRC_male <- combine_MCED_CRC(combined_first_results=combined_first_results_male,
+                                       combined_additional_results=combined_additional_results_male,
+                                       ending_age=500,
+                                       starting_age=45,
+                                       CRC_data=the_CRC_data_male,
+                                       surv_param_table=param_table)
+  
+  # Combine MCED and CRC results for females
+  results_CRC_female <- combine_MCED_CRC(combined_first_results=combined_first_results_female,
+                                         combined_additional_results=combined_additional_results_female,
+                                         ending_age=500,
+                                         starting_age=45,
+                                         CRC_data=the_CRC_data_female,
+                                         surv_param_table=param_table)
+  
+  # Combine results across sexes
+  results_all=bind_rows(results_CRC_female$results,results_CRC_male$results)
+  # Sum no-match counts across sexes
+  no_match_all=results_CRC_female$no_match_counter+results_CRC_male$no_match_counter
+  
+  return(list(results_all=results_all,no_match_all=no_match_all))
+}
+
+
+
+
+
+
+
+
+
+
+
+

@@ -27,20 +27,21 @@ sim_MCED_parallel_universe_before_CRC(
 )
 }
 \arguments{
-\item{cancer_sites}{Vector of cancer sites (allowable values include "Anus", ” Bladder" ,  ”Breast",  ”Colorectal" , "Esophagus"  , ”Gastric", "Headandneck", 
+\item{cancer_sites}{Vector of cancer sites (allowable values include "Anus", ” Bladder" ,
+  ”Breast",  ”Colorectal" , "Esophagus"  , ”Gastric", "Headandneck", 
 "Liver" ,  "Lung",   "Pancreas", "Prostate", "Renal", "Uterine","Ovary")}
 
-\item{LMST_vec}{Vector of late mean sojourn times for each cancer site.}
+\item{LMST_vec}{Numeric vector of late mean sojourn times (years) for each cancer site.}
 
-\item{OMST_vec}{Vector of overall mean sojourn times for each cancer site.}
+\item{OMST_vec}{Numeric vector of overall mean sojourn times (years) for each cancer site.}
 
 \item{test_performance_dataframe}{Data frame with test sensitivity/specificity info.}
 
 \item{MCED_specificity}{Overall specificity for the MCED test (not specific to cancer site)}
 
-\item{starting_age}{Starting age for simulation.}
+\item{starting_age}{Numeric starting age for simulation}
 
-\item{ending_age}{Ending age for simulation.}
+\item{ending_age}{Numeric ending age for simulation}
 
 \item{num_screens}{Number of screening rounds.}
 
@@ -64,7 +65,7 @@ sim_MCED_parallel_universe_before_CRC(
 
 \item{MCED_cdc}{CDC data for MCED.}
 
-\item{surv_param_table}{Survival parameters table.}
+\item{surv_param_table}{Data frame of cancer-specific survival parameters.}
 
 \item{CRC_data}{CRC data.}
 }
@@ -78,13 +79,15 @@ and presence of screening.   Cancer diagnosis and death times are presented both
 This function simulates cancer outcomes in a population with a designated starting age using a "parallel universe" approach.
 That is, cancer outcomes in the population are simulated with and without MCED screening.  The natural history (i.e., the times of cancer onset and clinical diagnosis) for 
 each individual is the same in both screening and no-screening scenarios.  
-The user specifies cancer sites in the MCED screening test.  The user also provides sensitivity of the tests for early and late-stage disease, where early refers to AJCC 7 stages I-II and late, III-IV, except for
-pancreas cancer, where early is stage I and late, II-IV. 
+
+The user specifies cancer sites in the MCED screening test.  
+The user also provides sensitivity of the tests for early and late-stage disease, where early refers
+to AJCC 7 stages I-II and late, III-IV, except for pancreas cancer, where early is stage I and late, II-IV. 
+
 Natural history models are based on built-in fitted models that are calibrated to SEER 2015-2021 data by age and sex and can be specified based on 
 user-provided inputs about the overall mean sojourn time (OMST) and the late mean sojourn time (LMST) for each cancer site. 
-The function tracks only the first cancer diagnosis based on pre-clinical onset.
-}
-\details{
+The function tracks only the first cancer diagnosis based on pre-clinical onset. 
+
 Other-cause mortality is based on all cause mortality tables from the Human Mortality Database that have been adjusted to remove the mortality due to
 cancers included in the MCED tests.  Cancer-specific mortality in the screen arm assumes a stage-shift benefit of screening. That is, individuals
 who are diagnosed in early stage under screening but who would have been diagnosed in late stage clinically, are assume to remain in early stage post lead-time. 
