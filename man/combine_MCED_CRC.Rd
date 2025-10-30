@@ -56,5 +56,4 @@ out <- combine_MCED_CRC(combined_first_results = combined_first_results,
                        CRC_data = CRC_data,
                        surv_param_table = param_table
 )
-
 }
