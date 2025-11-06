@@ -214,6 +214,8 @@ sim_MCED_parallel_universe_before_CRC <- function(cancer_sites,
   combined_additional_results=bind_rows(combined_additional_results_males,combined_additional_results_females)%>%
     mutate(start_age=starting_age,end_time=ending_age)
   
+  # browser()
+  
   return(list(
     combined_additional_results=combined_additional_results,  
     combined_first_results=combined_first_results
@@ -244,7 +246,7 @@ sim_MCED_parallel_universe_before_CRC <- function(cancer_sites,
 #' The reassignment algorithm attempts to match each additional cancer to an individual
 #'  without a primary cancer diagnosis in the same 5-year other-cause-death age stratum.
 #'  If a match is found, the additional cancer is reassigned to that individual; unmatched
-#'  additional cancers increment \code{no_match_counter}.
+#'  additional cancers increment no_match_counter.
 #' @export
 #'  
 #' @return A list with two elements: results(A data frame for all individuals after reassignment and
@@ -267,34 +269,6 @@ combine_MCED_CRC<- function(combined_first_results,
                             CRC_data,
                             surv_param_table){
   
-  #Note: consider if we want to use cancer onset or clinical diagnosis for additional cancers for purpose of calculating over diagnosis. 
-  #If we decide this is important, change clinical_diagnosis_time to cancer_onset_time in the subsequent code
-  
-  #Filter additional cancers for those whose clinical diagnosis is prior to other cause death
-  combined_additional_results <-combined_additional_results %>% filter(clinical_diagnosis_time <=other_cause_death_time)
-  
-  
-  #Simulate cancer-specific deaths for additional cancers
-  addtl_cancer_deaths=mapply(
-    FUN="sim_cancer_deaths_screen_no_screen",
-    clinical_diagnosis_time  = combined_additional_results$clinical_diagnosis_time,
-    clinical_diagnosis_stage = combined_additional_results$clinical_diagnosis_stage,
-                 cancer_site = combined_additional_results$cancer_site,
-                         sex = combined_additional_results$sex,
-                          ID = combined_additional_results$ID,
-      screen_diagnosis_stage = combined_additional_results$screen_diagnosis_stage,
-               MoreArgs = list(surv_param_table=surv_param_table),
-               SIMPLIFY = F) 
-  
-  #Join cancer-specific deaths with cancer diagnoses for additional cancers
-  combined_additional_results = data.frame(do.call(rbind,addtl_cancer_deaths))%>%
-    inner_join(combined_additional_results, by=c("ID","cancer_site"))
-  
-  # Combine the CRC data with the additional cancers for reassignment.  CRC diagnoses that occur after other cause death do not 
-  #  need to be reassigned so these people are removed from combined_additional_results.
-  combined_additional_results <- bind_rows(CRC_data,combined_additional_results)%>%
-    mutate(age_OC_death_cat=cut(other_cause_death_time,breaks=seq(0,150,by=5)))%>% 
-    filter(clinical_diagnosis_time <=other_cause_death_time)
   
   # Identify people who have clinical diagnosis of first cancer prior to other cause death  
   primary_cancer <- combined_first_results %>% filter(clinical_diagnosis_time<=other_cause_death_time)
@@ -305,49 +279,89 @@ combine_MCED_CRC<- function(combined_first_results,
   no_primary_cancer <- combined_first_results %>% filter(clinical_diagnosis_time>other_cause_death_time)%>%
     mutate(age_OC_death_cat=cut(other_cause_death_time,breaks=seq(0,150,by=5)))
   
-  
-  # Record counts for verification ----
-  # Counts of number of multiple cancers, primary cancers in lifetime, and no primary cancers in lifetime
-  N_multiple_cancers=nrow(combined_additional_results)
-  N_primary_cancers=nrow(primary_cancer)
-  N_no_primary_cancer=nrow(no_primary_cancer)
-  
-  # Set index as ID to identify specific individual without primary cancer (used in bookkeeping in next step)
-  no_primary_cancer <- no_primary_cancer %>% mutate(index=seq(1,nrow(no_primary_cancer)))
-  
-  # ---- Reassignment Algorithm ----
-  # This loop goes through the combined_additional_results rows and attempts to match in an individual in
-  #   no_primary_cancer within the same OC death strata. 
-  # Then it adds the combined_additional_results row to primary_cancer and removes the matching row from
-  #   no_primary cancer, since they are not eligible to matched again. 
-  # Finally, it removes the row from combined_additional_results and updates the no_match_counter.
+  #If there are additional results (i.e. at least one row is not empty), then reassign
+  combined_additional_results <-combined_additional_results %>% filter(clinical_diagnosis_time <=other_cause_death_time)
+  at_least_one_additional_result=dim(combined_additional_results)[1]>0
   no_match_counter=0
-  while(nrow(combined_additional_results)>0){
-    # Attempt to match first row of additional cancers
-    test = match_individual(
-      i = 1,
-      combined_additional_results = combined_additional_results,
-      no_primary_cancer = no_primary_cancer
-    )
-    # If match found
-    if(length(test)>1){
-      # Add this additional cancer to primary_cancer
-      primary_cancer=bind_rows(combined_additional_results[1,],primary_cancer)
-      no_primary_cancer=no_primary_cancer%>%filter(index!=test$index)
-    }else{
-      # No match found, increment counter
-      no_match_counter = no_match_counter+1
-    }
-    # Remove processed row
-    combined_additional_results=combined_additional_results[-1,]
-    
-  }
   
-  # ---- Verify counts ----
-  # Check to see if the added and subtracted rows match expectations based on previous loop. 
-  N_multiple_cancers_2=nrow(combined_additional_results)
-  N_primary_cancers_2=nrow(primary_cancer)
-  N_no_primary_cancer_2=nrow(no_primary_cancer)
+  if(at_least_one_additional_result){  
+    
+    #Note: consider if we want to use cancer onset or clinical diagnosis for additional cancers for purpose of calculating over diagnosis. 
+    #If we decide this is important, change clinical_diagnosis_time to cancer_onset_time in the subsequent code
+    
+    #Filter additional cancers for those whose clinical diagnosis is prior to other cause death
+    
+    
+    # browser()
+    
+    #Simulate cancer-specific deaths for additional cancers
+    addtl_cancer_deaths=mapply(
+      FUN="sim_cancer_deaths_screen_no_screen",
+      clinical_diagnosis_time  = combined_additional_results$clinical_diagnosis_time,
+      clinical_diagnosis_stage = combined_additional_results$clinical_diagnosis_stage,
+      cancer_site = combined_additional_results$cancer_site,
+      sex = combined_additional_results$sex,
+      ID = combined_additional_results$ID,
+      screen_diagnosis_stage = combined_additional_results$screen_diagnosis_stage,
+      MoreArgs = list(surv_param_table=surv_param_table),
+      SIMPLIFY = F) 
+    
+    
+    #Join cancer-specific deaths with cancer diagnoses for additional cancers
+    combined_additional_results = data.frame(do.call(rbind,addtl_cancer_deaths))%>%
+      inner_join(combined_additional_results, by=c("ID","cancer_site"))
+    
+    # Combine the CRC data with the additional cancers for reassignment.  CRC diagnoses that occur after other cause death do not 
+    #  need to be reassigned so these people are removed from combined_additional_results.
+    combined_additional_results <- bind_rows(CRC_data,combined_additional_results)%>%
+      mutate(age_OC_death_cat=cut(other_cause_death_time,breaks=seq(0,150,by=5)))%>% 
+      filter(clinical_diagnosis_time <=other_cause_death_time)
+    
+    
+    
+    # Record counts for verification 
+    # Counts of number of multiple cancers, primary cancers in lifetime, and no primary cancers in lifetime
+    N_multiple_cancers=nrow(combined_additional_results)
+    N_primary_cancers=nrow(primary_cancer)
+    N_no_primary_cancer=nrow(no_primary_cancer)
+    
+    # Set index as ID to identify specific individual without primary cancer (used in bookkeeping in next step)
+    no_primary_cancer <- no_primary_cancer %>% mutate(index=seq(1,nrow(no_primary_cancer)))
+    
+    #  Reassignment Algorithm 
+    # This loop goes through the combined_additional_results rows and attempts to match in an individual in
+    #   no_primary_cancer within the same OC death strata. 
+    # Then it adds the combined_additional_results row to primary_cancer and removes the matching row from
+    #   no_primary cancer, since they are not eligible to matched again. 
+    # Finally, it removes the row from combined_additional_results and updates the no_match_counter.
+    no_match_counter=0
+    while(nrow(combined_additional_results)>0){
+      # Attempt to match first row of additional cancers
+      test = match_individual(
+        i = 1,
+        combined_additional_results = combined_additional_results,
+        no_primary_cancer = no_primary_cancer
+      )
+      # If match found
+      if(length(test)>1){
+        # Add this additional cancer to primary_cancer
+        primary_cancer=bind_rows(combined_additional_results[1,],primary_cancer)
+        no_primary_cancer=no_primary_cancer%>%filter(index!=test$index)
+      }else{
+        # No match found, increment counter
+        no_match_counter = no_match_counter+1
+      }
+      # Remove processed row
+      combined_additional_results=combined_additional_results[-1,]
+      
+    }
+    
+    # Verify counts
+    # Check to see if the added and subtracted rows match expectations based on previous loop. 
+    N_multiple_cancers_2=nrow(combined_additional_results)
+    N_primary_cancers_2=nrow(primary_cancer)
+    N_no_primary_cancer_2=nrow(no_primary_cancer)
+  }#End of if statement (reassigning)
   
   # Final data with all cancers combined (first cancers and reassigned cancers)
   combined_results=bind_rows(primary_cancer,no_primary_cancer) 
@@ -412,7 +426,7 @@ combine_MCED_CRC<- function(combined_first_results,
 }
 
 #########################################
-# Combine MCED and CRC data for specific age category and sex
+#' Combine MCED and CRC data for specific age category and sex
 
 #' @description
 #' Integrates CRC screening outcomes with MCED results within a specified 5-year
@@ -435,9 +449,8 @@ combine_MCED_CRC<- function(combined_first_results,
 #'                            the_CRC_data = crc_processed,
 #'             combined_additional_results = combined_addtl,
 #'                  combined_first_results = combined_first,
-#'                             the_age_cat = "(60,65]"
-#'       ) 
-#' 
+#'                             the_age_cat = "(60,65]")
+#'                              
 combine_by_age_cat_sex<-function(the_CRC_data,
                                  combined_additional_results,
                                  combined_first_results,
