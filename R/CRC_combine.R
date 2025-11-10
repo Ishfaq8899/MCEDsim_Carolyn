@@ -113,12 +113,17 @@ sim_MCED_parallel_universe_before_CRC <- function(cancer_sites,
                                                   hmd_data,
                                                   MCED_cdc,
                                                   surv_param_table,
-                                                  start_ID){
+                                                  simulation_seed){
   
-  # Create a vector of IDs
-  IDs_male <- start_ID:(num_males+start_ID)
+ total_individuals=num_males+num_females
+ 
+ start_male=(simulation_seed-1)*(total_individuals)+1
+ end_male=start_male+num_males-1
+   # Create a vector of IDs
+  IDs_male <- start_male:end_male
+  
   # Female IDs: continue sequentially after males
-  IDs_female <-(num_males+1):(num_females+num_males)
+  IDs_female <-(end_male+1):(num_females+end_male)
   
   
   # ---- Extract Sex-Specific Rate Matrices ----  
