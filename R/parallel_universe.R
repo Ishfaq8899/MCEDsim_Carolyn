@@ -72,6 +72,7 @@ sim_individual_MCED<-function( ID,
                                sex,
                                surv_param_table){
   
+  set.seed(ID)
   # simulate time of other cause death 
   other_cause_death = sim_othercause_death(other_cause_death_dist,ID=ID)
   

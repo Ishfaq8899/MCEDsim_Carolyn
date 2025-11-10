@@ -112,10 +112,11 @@ sim_MCED_parallel_universe_before_CRC <- function(cancer_sites,
                                                   cdc_data, 
                                                   hmd_data,
                                                   MCED_cdc,
-                                                  surv_param_table){
+                                                  surv_param_table,
+                                                  start_ID){
   
   # Create a vector of IDs
-  IDs_male <- 1:num_males
+  IDs_male <- start_ID:(num_males+start_ID)
   # Female IDs: continue sequentially after males
   IDs_female <-(num_males+1):(num_females+num_males)
   
