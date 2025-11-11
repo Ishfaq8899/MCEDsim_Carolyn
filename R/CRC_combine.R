@@ -42,6 +42,7 @@
 #' @param MCED_cdc CDC data for MCED.
 #' @param surv_param_table Data frame of cancer-specific survival parameters.
 #' @param CRC_data CRC data.
+#' @param simulation_seed Set seed for each simulation
 #' @export
 #'
 #' @return A data frame with combined simulated results for all individuals.
