@@ -63,6 +63,9 @@ sim_cancer_death_param <- function(the_stage, the_cancer_site, the_sex,ID=NA,the
   survival_dist_indiv = filter(param_table,cancer_site == paste(the_cancer_site), stage==paste(the_stage),
                                sex==paste(the_sex),model_type==paste(the_model_type))
   
+  
+  if(length(survival_dist_indiv$model_type == "Loglogistic")==0){browser()}
+  
   if(survival_dist_indiv$model_type=="Loglogistic"){
     the_survobj=s_loglogistic(intercept = survival_dist_indiv$intercept, scale =survival_dist_indiv$scale)
   }

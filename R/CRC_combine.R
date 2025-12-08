@@ -115,7 +115,8 @@ sim_MCED_parallel_universe_before_CRC <- function(cancer_sites,
                                                   MCED_cdc,
                                                   surv_param_table,
                                                   simulation_seed){
-  
+ 
+browser() 
  total_individuals=num_males+num_females
  
  start_male=(simulation_seed-1)*(total_individuals)+1
